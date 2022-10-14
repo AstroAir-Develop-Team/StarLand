@@ -80,9 +80,6 @@ class starmain(wx.Frame):
         self.Bind( wx.EVT_MENU, self.on_exit_selected, id = self.m_menuItem_exit.GetId() )
         self.Bind( wx.EVT_MENU, self.on_show_help, id = self.m_menuItem_ahout.GetId() )
 
-    def __del__(self):
-        pass
-
     def OnClose(self,event):
         self.Destroy()
         exit(0)

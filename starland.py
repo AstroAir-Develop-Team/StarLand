@@ -71,9 +71,9 @@ def main():
         else:
             log.log("Fail ,redo")
     except KeyboardInterrupt:
-        pass
+        log.log("Shutdown by user,bye.")
         
 if __name__ == "__main__":
     main()
 else:
-    pass
+    log.log("Please run in main thread")

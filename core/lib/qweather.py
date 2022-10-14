@@ -16,7 +16,7 @@ Boston, MA 02110-1301, USA.
 """
 
 import requests
-import json
+import json,os
 from concurrent.futures import ThreadPoolExecutor
 
 from core.lib.starlog import starlog
@@ -54,6 +54,9 @@ class Qweather():
     # 获取定位
     def get_location(self):
         if self.is_internet_connected:
+            # 如果没有文件夹就自己建一个
+            if not os.path.exists("config/client"):
+                os.mkdir("config/client")
             """
             此处是否有能代替以下两个网址的，以提高访问速度
             """

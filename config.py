@@ -16,5 +16,7 @@ Boston, MA 02110-1301, USA.
 """
 
 __version__ = "Indev"
+__author__ = "Max_Qian"
+__license__ = "GPL-3"
 
 assets,config_data = {},{}
