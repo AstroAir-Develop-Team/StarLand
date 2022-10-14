@@ -1,0 +1,5 @@
+{
+    "config" : {
+        "qweather" : ["config/client/location.json","config/client/qweather.json"]
+    }
+}

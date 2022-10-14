@@ -1,0 +1,7 @@
+{
+    "textures" : {
+        "icon" : "assets/textures/icon.ico",
+        "background" : "assets/textures/background.png",
+        "splash" : "assets/textures/splash.png"
+    }
+}
