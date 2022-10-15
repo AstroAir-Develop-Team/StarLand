@@ -16,6 +16,7 @@ Boston, MA 02110-1301, USA.
 """
 
 import wx
+import threading
 
 # 所有的内置UI
 from core.ui.mainui import m_main_panel
@@ -32,6 +33,7 @@ import config
 # 所有的内置库
 from core.lib.qweather import Qweather
 from core.lib.starlog import starlog
+from core.lib.server import starserver
 
 log = starlog(__name__)
 
@@ -61,6 +63,9 @@ class starmain(wx.Frame):
         self.pnl.m_main_device = m_device_panel(self.pnl.m_main_device)
 
         self.qweather = Qweather()
+        self.server = starserver()
+
+        self.pnl.m_main_server.m_native_start.Bind(wx.EVT_BUTTON,self.on_server_start,id=self.pnl.m_main_server.m_native_start.GetId())
 
         self.Bind(wx.EVT_CLOSE,self.OnClose)
 
@@ -96,4 +101,8 @@ class starmain(wx.Frame):
         about = m_ahout_ui()
         about.OnAboutBox()
 
-
+    def on_server_start(self,event):
+        server_thread = threading.Thread(target=self.server.runserver)
+        server_thread.setDaemon(True)
+        server_thread.setName("Falsk thread")
+        server_thread.start()    

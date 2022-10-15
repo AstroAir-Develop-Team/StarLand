@@ -8,5 +8,8 @@
                 "weather" : "assets/textures/icon/m_weather_icon.png"
             }
         }
+    },
+    "web" : {
+        "index" : "index.html"
     }
 }
