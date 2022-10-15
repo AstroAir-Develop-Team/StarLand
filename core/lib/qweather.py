@@ -17,7 +17,6 @@ Boston, MA 02110-1301, USA.
 
 import requests
 import json,os
-from concurrent.futures import ThreadPoolExecutor
 
 from core.lib.starlog import starlog
 import config
@@ -27,10 +26,10 @@ log = starlog(__name__)
 class Qweather():
 
     def __init__(self) -> None:
-        self.is_internet_connected = self.checkconnection()
-        self.threadpool = ThreadPoolExecutor(max_workers=5)
-        self.threadpool.submit(self.get_location())
-        self.threadpool.submit(self.hitokoto())
+        self.is_internet_connected = config.threadpool.submit(self.checkconnection())
+        
+        config.threadpool.submit(self.get_location())
+        config.threadpool.submit(self.hitokoto())
         pass
 
     def __del__(self):

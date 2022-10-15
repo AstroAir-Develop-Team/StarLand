@@ -21,9 +21,11 @@ import wx
 from core.ui.mainui import m_main_panel
 from core.ui.starinfoui import m_starinfo_panel
 from core.ui.weatherui import m_weather_panel
-from core.ui.taskbaricon import m_taskbar_icon
 from core.ui.serverui import m_server_panel
 from core.ui.deviceui import m_device_panel
+
+from core.ui.taskbaricon import m_taskbar_icon
+from core.ui.aboutui import m_ahout_ui
 
 import config
 
@@ -38,7 +40,7 @@ class starmain(wx.Frame):
     def __init__(self,parent):
 
         log.log("Prepare main ui and load infomation")
-        wx.Frame.__init__(self,parent,title = u"星空猎手",pos = wx.DefaultPosition, size = wx.Size( 660,390 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
+        wx.Frame.__init__(self,parent,title = u"星空猎手",pos = wx.DefaultPosition, size = wx.Size( 660,410 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
 
         
         self.pnl = m_main_panel(self)
@@ -46,13 +48,16 @@ class starmain(wx.Frame):
         self.SetIcon(wx.Icon(config.assets["textures"]["icon"]))
 
         #设置背景
-        self.SetSizeHints( wx.DefaultSize, wx.Size( 660,390 ) )
+        self.SetSizeHints( wx.DefaultSize, wx.Size( 660,410 ) )
         self.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_INFOTEXT ) )
         self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
 
         self.pnl.m_main_starinfo = m_starinfo_panel(self.pnl.m_main_starinfo)
+        
         self.pnl.m_main_weather = m_weather_panel(self.pnl.m_main_weather)
+        #self.weather_icon = wx.Bitmap(config.assets["textures"]["uicon"]["main"]["weather"],wx.BITMAP_TYPE_ANY)
         self.pnl.m_main_server = m_server_panel(self.pnl.m_main_server)
+        
         self.pnl.m_main_device = m_device_panel(self.pnl.m_main_device)
 
         self.qweather = Qweather()
@@ -85,10 +90,10 @@ class starmain(wx.Frame):
         exit(0)
 
     def on_exit_selected( self, event ):
-        event.Skip()
         exit(0)
 
     def on_show_help( self, event ):
-        event.Skip()
+        about = m_ahout_ui()
+        about.OnAboutBox()
 
 

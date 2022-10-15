@@ -30,7 +30,7 @@ class m_main_panel ( wx.Panel ):
 
 		self.m_main_container = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_main_device = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_device, u"设备", True )
+		self.m_main_container.AddPage( self.m_main_device, u"设备", True)
 		self.m_main_weather = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		self.m_main_container.AddPage( self.m_main_weather, u"天气", False )
 		self.m_main_starparser = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )

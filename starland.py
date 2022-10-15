@@ -29,6 +29,18 @@ def load_assets():
         try:
             with open("assets/assets.json",mode="r",encoding="utf-8") as file:
                 config.assets = json.load(file)
+                log.log("Loaded asset config ,try to check all of the files")
+            """
+            此处有大问题，遍历多层字典
+            for value in config.assets.values():
+                dic = value.values()
+                for i in range(len(dic)):
+                    file = list(dic)[i]
+                    if not os.path.isfile(file):
+                        log.log(f"Could not find {file}")
+                        raise FileNotFoundError(f"{file}")
+                log.log("All file check passed")
+            """
             return True
         except IOError:
             log.log("IOError when loaded assets/asset.json")

@@ -15,8 +15,12 @@ the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
 """
 
+from concurrent.futures import ThreadPoolExecutor
+
 __version__ = "Indev"
 __author__ = "Max_Qian"
 __license__ = "GPL-3"
 
 assets,config_data = {},{}
+
+threadpool = ThreadPoolExecutor(max_workers=5)
