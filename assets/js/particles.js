@@ -136,6 +136,13 @@ var pJS = function(tag_id, params){
 
   var pJS = this.pJS;
 
+  pJS.fn.saferandom = function(){
+    const crypto = window.crypto || window.webkitCrypto || window.mozCrypto || window.oCrypto || window.msCrypto;
+    var array = new Uint16Array(16);
+    crypto.getRandomValues(array);
+    return array[0]/65536;
+  }
+
   /* params settings */
   if(params){
     Object.deepExtend(pJS, params);
@@ -241,18 +248,18 @@ var pJS = function(tag_id, params){
   pJS.fn.particle = function(color, opacity, position){
 
     /* size */
-    this.radius = (pJS.particles.size.random ? Math.random() : 1) * pJS.particles.size.value;
+    this.radius = (pJS.particles.size.random ? pJS.fn.saferandom() : 1) * pJS.particles.size.value;
     if(pJS.particles.size.anim.enable){
       this.size_status = false;
       this.vs = pJS.particles.size.anim.speed / 100;
       if(!pJS.particles.size.anim.sync){
-        this.vs = this.vs * Math.random();
+        this.vs = this.vs * pJS.fn.saferandom();
       }
     }
 
     /* position */
-    this.x = position ? position.x : Math.random() * pJS.canvas.w;
-    this.y = position ? position.y : Math.random() * pJS.canvas.h;
+    this.x = position ? position.x : pJS.fn.saferandom() * pJS.canvas.w;
+    this.y = position ? position.y : pJS.fn.saferandom() * pJS.canvas.h;
 
     /* check position  - into the canvas */
     if(this.x > pJS.canvas.w - this.radius*2) this.x = this.x - this.radius;
@@ -270,7 +277,7 @@ var pJS = function(tag_id, params){
     if(typeof(color.value) == 'object'){
 
       if(color.value instanceof Array){
-        var color_selected = color.value[Math.floor(Math.random() * pJS.particles.color.value.length)];
+        var color_selected = color.value[Math.floor(pJS.fn.saferandom() * pJS.particles.color.value.length)];
         this.color.rgb = hexToRgb(color_selected);
       }else{
         if(color.value.r != undefined && color.value.g != undefined && color.value.b != undefined){
@@ -292,9 +299,9 @@ var pJS = function(tag_id, params){
     }
     else if(color.value == 'random'){
       this.color.rgb = {
-        r: (Math.floor(Math.random() * (255 - 0 + 1)) + 0),
-        g: (Math.floor(Math.random() * (255 - 0 + 1)) + 0),
-        b: (Math.floor(Math.random() * (255 - 0 + 1)) + 0)
+        r: (Math.floor(pJS.fn.saferandom() * (255 - 0 + 1)) + 0),
+        g: (Math.floor(pJS.fn.saferandom() * (255 - 0 + 1)) + 0),
+        b: (Math.floor(pJS.fn.saferandom() * (255 - 0 + 1)) + 0)
       }
     }
     else if(typeof(color.value) == 'string'){
@@ -303,12 +310,12 @@ var pJS = function(tag_id, params){
     }
 
     /* opacity */
-    this.opacity = (pJS.particles.opacity.random ? Math.random() : 1) * pJS.particles.opacity.value;
+    this.opacity = (pJS.particles.opacity.random ? pJS.fn.saferandom() : 1) * pJS.particles.opacity.value;
     if(pJS.particles.opacity.anim.enable){
       this.opacity_status = false;
       this.vo = pJS.particles.opacity.anim.speed / 100;
       if(!pJS.particles.opacity.anim.sync){
-        this.vo = this.vo * Math.random();
+        this.vo = this.vo * pJS.fn.saferandom();
       }
     }
 
@@ -348,15 +355,15 @@ var pJS = function(tag_id, params){
       this.vx = velbase.x;
       this.vy = velbase.y;
       if(pJS.particles.move.random){
-        this.vx = this.vx * (Math.random());
-        this.vy = this.vy * (Math.random());
+        this.vx = this.vx * (pJS.fn.saferandom());
+        this.vy = this.vy * (pJS.fn.saferandom());
       }
     }else{
-      this.vx = velbase.x + Math.random()-0.5;
-      this.vy = velbase.y + Math.random()-0.5;
+      this.vx = velbase.x + pJS.fn.saferandom()-0.5;
+      this.vy = velbase.y + pJS.fn.saferandom()-0.5;
     }
 
-    // var theta = 2.0 * Math.PI * Math.random();
+    // var theta = 2.0 * Math.PI * pJS.fn.saferandom();
     // this.vx = Math.cos(theta);
     // this.vy = Math.sin(theta);
 
@@ -370,7 +377,7 @@ var pJS = function(tag_id, params){
     var shape_type = pJS.particles.shape.type;
     if(typeof(shape_type) == 'object'){
       if(shape_type instanceof Array){
-        var shape_selected = shape_type[Math.floor(Math.random() * shape_type.length)];
+        var shape_selected = shape_type[Math.floor(pJS.fn.saferandom() * shape_type.length)];
         this.shape = shape_selected;
       }
     }else{
@@ -568,19 +575,19 @@ var pJS = function(tag_id, params){
 
       if(p.x - p.radius > pJS.canvas.w){
         p.x = new_pos.x_left;
-        p.y = Math.random() * pJS.canvas.h;
+        p.y = pJS.fn.saferandom() * pJS.canvas.h;
       }
       else if(p.x + p.radius < 0){
         p.x = new_pos.x_right;
-        p.y = Math.random() * pJS.canvas.h;
+        p.y = pJS.fn.saferandom() * pJS.canvas.h;
       }
       if(p.y - p.radius > pJS.canvas.h){
         p.y = new_pos.y_top;
-        p.x = Math.random() * pJS.canvas.w;
+        p.x = pJS.fn.saferandom() * pJS.canvas.w;
       }
       else if(p.y + p.radius < 0){
         p.y = new_pos.y_bottom;
-        p.x = Math.random() * pJS.canvas.w;
+        p.x = pJS.fn.saferandom() * pJS.canvas.w;
       }
 
       /* out of canvas modes */
@@ -760,8 +767,8 @@ var pJS = function(tag_id, params){
           pJS.particles.color,
           pJS.particles.opacity.value,
           {
-            'x': pos ? pos.pos_x : Math.random() * pJS.canvas.w,
-            'y': pos ? pos.pos_y : Math.random() * pJS.canvas.h
+            'x': pos ? pos.pos_x : pJS.fn.saferandom() * pJS.canvas.w,
+            'y': pos ? pos.pos_y : pJS.fn.saferandom() * pJS.canvas.h
           }
         )
       )
@@ -1193,8 +1200,8 @@ var pJS = function(tag_id, params){
           dist = Math.sqrt(dx*dx + dy*dy);
 
       if(dist <= p1.radius + p2.radius){
-        p1.x = position ? position.x : Math.random() * pJS.canvas.w;
-        p1.y = position ? position.y : Math.random() * pJS.canvas.h;
+        p1.x = position ? position.x : pJS.fn.saferandom() * pJS.canvas.w;
+        p1.y = position ? position.y : pJS.fn.saferandom() * pJS.canvas.h;
         pJS.fn.vendors.checkOverlap(p1);
       }
     }
