@@ -18,22 +18,36 @@ Boston, MA 02110-1301, USA.
 import flask
 import flask_wtf
 import flask_socketio
-import threading
 
 from gevent import pywsgi
 
 import config
 
+# 初始化Flask服务器
 app = flask.Flask(__name__,static_folder="../../assets/",template_folder="../../assets/templates/")
+app.config['WTF_CSRF_ENABLED'] = False
+# Websocket服务
 socketio = flask_socketio.SocketIO(app)
+# 不知道是什么的推荐的保护
 crfs = flask_wtf.csrf.CSRFProtect()
 crfs.init_app(app)
-app.config['WTF_CSRF_ENABLED'] = False
 
 @app.route("/")
 @crfs.exempt
 def index():
     return flask.render_template(config.assets["web"]["index"])
+
+@app.route("/novnc")
+def novnc():
+    return flask.render_template(config.assets["web"]["novnc"])
+
+@app.errorhandler(404)
+def not_found(_):
+    return flask.render_template(config.assets["web"]["404"])
+
+@app.errorhandler(500)
+def server_error(_):
+    return flask.render_template(config.assets["web"]["500"])
 
 class starserver():
 

@@ -6,10 +6,20 @@
         "uicon" : {
             "main" : {
                 "weather" : "assets/textures/icon/m_weather_icon.png"
+            },
+            "device" : {
+                "camera" : "assets/textures/icon/m_device_camera.png"
             }
+        },
+        "menu" : {
+            "exit" : "assets/textures/icon/m_menu_exit.png",
+            "about" : "assets/textures/icon/m_menu_ahout.png"
         }
     },
     "web" : {
-        "index" : "index.html"
+        "index" : "index.html",
+        "novnc" : "novnc.html",
+        "404" : "404.html",
+        "500" : "500.html"
     }
 }

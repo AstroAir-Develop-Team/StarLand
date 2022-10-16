@@ -17,6 +17,8 @@ Boston, MA 02110-1301, USA.
 
 import wx
 
+import core.ui.images as imglib
+
 ###########################################################################
 ## Class m_main_panel
 ###########################################################################
@@ -30,19 +32,32 @@ class m_main_panel ( wx.Panel ):
 
 		self.m_main_container = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_main_device = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_device, u"设备", True)
 		self.m_main_weather = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_weather, u"天气", False )
 		self.m_main_starparser = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_starparser, u"天体搜索", False )
 		self.m_main_starinfo = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_starinfo, u"天体信息", False )
 		self.m_main_server = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_server, u"服务器", False )
 		self.m_main_mod = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_mod, u"模组", False )
 		self.m_main_config = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_container.AddPage( self.m_main_config, u"配置", False )
+
+		lb_icon = wx.ImageList(16,16)
+
+		lb_icon.Add(getattr(imglib,"device").GetBitmap())
+		lb_icon.Add(getattr(imglib,"weather").GetBitmap())
+		lb_icon.Add(getattr(imglib,"search").GetBitmap())
+		lb_icon.Add(getattr(imglib,"starinfo").GetBitmap())
+		lb_icon.Add(getattr(imglib,"server").GetBitmap())
+		lb_icon.Add(getattr(imglib,"mod").GetBitmap())
+		lb_icon.Add(getattr(imglib,"config").GetBitmap())
+
+		self.m_main_container.AssignImageList(lb_icon)
+
+		self.m_main_container.AddPage( self.m_main_device, u"设备", True,imageId=0)
+		self.m_main_container.AddPage( self.m_main_weather, u"天气", False ,imageId=1)
+		self.m_main_container.AddPage( self.m_main_starparser, u"天体搜索", False ,imageId=2)
+		self.m_main_container.AddPage( self.m_main_starinfo, u"天体信息", False ,imageId=3)
+		self.m_main_container.AddPage( self.m_main_server, u"服务器", False ,imageId=4)
+		self.m_main_container.AddPage( self.m_main_mod, u"模组", False ,imageId=5)
+		self.m_main_container.AddPage( self.m_main_config, u"配置", False ,imageId=6)
 
 		m_main_sizer.Add( self.m_main_container, 1, wx.EXPAND |wx.ALL, 5 )
 

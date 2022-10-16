@@ -23,10 +23,12 @@ from core.ui.mainui import m_main_panel
 from core.ui.starinfoui import m_starinfo_panel
 from core.ui.weatherui import m_weather_panel
 from core.ui.serverui import m_server_panel
-from core.ui.deviceui import m_device_panel
+from core.stardevice import stardevice
 
 from core.ui.taskbaricon import m_taskbar_icon
 from core.ui.aboutui import m_ahout_ui
+
+import core.ui.images as imglib
 
 import config
 
@@ -44,8 +46,8 @@ class starmain(wx.Frame):
         log.log("Prepare main ui and load infomation")
         wx.Frame.__init__(self,parent,title = u"星空猎手",pos = wx.DefaultPosition, size = wx.Size( 660,410 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
 
-        
         self.pnl = m_main_panel(self)
+
         self.tb = m_taskbar_icon(self)
         self.SetIcon(wx.Icon(config.assets["textures"]["icon"]))
 
@@ -60,7 +62,9 @@ class starmain(wx.Frame):
         #self.weather_icon = wx.Bitmap(config.assets["textures"]["uicon"]["main"]["weather"],wx.BITMAP_TYPE_ANY)
         self.pnl.m_main_server = m_server_panel(self.pnl.m_main_server)
         
-        self.pnl.m_main_device = m_device_panel(self.pnl.m_main_device)
+        self.pnl.m_main_device = stardevice(self.pnl.m_main_device)
+
+        
 
         self.qweather = Qweather()
         self.server = starserver()
@@ -73,12 +77,14 @@ class starmain(wx.Frame):
         self.m_menubar = wx.MenuBar( 0 )
         self.m_menu_file = wx.Menu()
         self.m_menuItem_exit = wx.MenuItem( self.m_menu_file, wx.ID_ANY, u"退出"+ u"\t" + u"ALT + F4", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menuItem_exit.SetBitmap(wx.Bitmap(config.assets["textures"]["menu"]["exit"],wx.BITMAP_TYPE_PNG))
         self.m_menu_file.Append( self.m_menuItem_exit )
 
         self.m_menubar.Append( self.m_menu_file, u"文件" )
 
         self.m_menu_help = wx.Menu()
         self.m_menuItem_ahout = wx.MenuItem( self.m_menu_help, wx.ID_ANY, u"关于", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menuItem_ahout.SetBitmap(wx.Bitmap(config.assets["textures"]["menu"]["about"],wx.BITMAP_TYPE_PNG))
         self.m_menu_help.Append( self.m_menuItem_ahout )
 
         self.m_menubar.Append( self.m_menu_help, u"帮助" )

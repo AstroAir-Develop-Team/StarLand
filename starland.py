@@ -71,8 +71,6 @@ def main():
             log.log("Loading starland ui and server , please wait for a moment")
             log.log(f"System info : {sys.version}")
             log.log(f"Wx version : {wx.version()}")
-            log.logw(f"aaaaa")
-            log.loge(f"aaaaa")
             #eval("from core.starloader import starloader")
             #mod = importlib.import_module("core.starloader")
             #eval("")
