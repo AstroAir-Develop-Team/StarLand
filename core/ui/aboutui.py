@@ -50,7 +50,7 @@ class m_ahout_ui(wx.adv.AboutDialogInfo):
         info.SetVersion('Indev')
         info.SetDescription(description)
         info.SetCopyright('(C) 2022 Max Qian')
-        info.SetWebSite('http://astroair.cn')
+        info.SetWebSite('https://astroair.cn')
         info.SetLicence(licence)
         info.AddDeveloper('Max Qian')
         info.AddDocWriter('Max Qian')

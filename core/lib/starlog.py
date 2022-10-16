@@ -16,18 +16,48 @@ Boston, MA 02110-1301, USA.
 """
 
 import logging
+from colorama import Fore,init
+from os import mkdir, path
+from time import strftime
 
+# 初始化日志对象
 logger = logging.getLogger(__name__)
-console_handle = logging.StreamHandler()
-logger.addHandler(console_handle)
 fort = logging.Formatter('[%(asctime)s][%(levelname)s]%(message)s')
+# 控制台日志参数
+console_handle = logging.StreamHandler()
 console_handle.setFormatter(fort)
+logger.addHandler(console_handle)
+# 文件日志
+if not path.exists("./logs"):       # 若日志文件夹不存在，则创建一个
+    mkdir("./logs")
+file_handle = logging.FileHandler(filename=f"logs/{strftime('%Y-%m-%d#%H%M%S')}.log",encoding="utf-8",mode="w+")
+file_handle.setFormatter(fort)
+logger.addHandler(file_handle)
+# 设置日志级别
 logger.setLevel(logging.INFO)
+
+init(autoreset=True)
 
 class starlog():
 
-    def __init__(self,name) -> None:
+    def __init__(self,name) -> (str):
         self.uname = name
 
+    def __del__(self):
+        pass
+
+    #日志
     def log(self,msg) -> (str):
         logger.info(f"[{self.uname}] - {msg}")
+
+    # 错误日志
+    def loge(self,msg) -> (str):
+        logger.info(f"[{self.uname}] - " + Fore.RED + f"{msg}" + Fore.RESET)
+
+    # 警告日志
+    def logw(self,msg) -> (str):
+        logger.info(f"[{self.uname}] - " + Fore.YELLOW + f"{msg}" + Fore.RESET)
+
+    # 调试日志
+    def logd(self,msg) -> (str):
+        logger.info(f"[{self.uname}] - " + Fore.MAGENTA + f"{msg}" + Fore.RESET)

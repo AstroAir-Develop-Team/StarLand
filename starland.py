@@ -43,11 +43,11 @@ def load_assets():
             """
             return True
         except IOError:
-            log.log("IOError when loaded assets/asset.json")
+            log.loge("IOError when loaded assets/asset.json")
         except:
-            log.log("Unknown error when loaded assets/assets.json")
+            log.loge("Unknown error when loaded assets/assets.json")
     else:
-        log.log("Could not find assets/assets.json,please check it!")
+        log.loge("Could not find assets/assets.json,please check it!")
         return False
 
 # 加载本体配置
@@ -58,11 +58,11 @@ def load_config():
                 config.config_data  = json.load(file)
             return True
         except IOError:
-            log.log("IOError when loaded assets/config.json")
+            log.loge("IOError when loaded assets/config.json")
         except:
-            log.log("Unknown error when loaded assets/config.json")
+            log.loge("Unknown error when loaded assets/config.json")
     else:
-        log.log("Could not find assets/config.json,please check it!")
+        log.loge("Could not find assets/config.json,please check it!")
     return False
 
 def main():
@@ -71,6 +71,8 @@ def main():
             log.log("Loading starland ui and server , please wait for a moment")
             log.log(f"System info : {sys.version}")
             log.log(f"Wx version : {wx.version()}")
+            log.logw(f"aaaaa")
+            log.loge(f"aaaaa")
             #eval("from core.starloader import starloader")
             #mod = importlib.import_module("core.starloader")
             #eval("")
@@ -81,9 +83,9 @@ def main():
             frame.Show()
             app.MainLoop()
         else:
-            log.log("Fail ,redo")
+            log.loge("Fail ,redo")
     except KeyboardInterrupt:
-        log.log("Shutdown by user,bye.")
+        log.loge("Shutdown by user,bye.")
         
 if __name__ == "__main__":
     main()
