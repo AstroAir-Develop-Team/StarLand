@@ -12,9 +12,8 @@ body {
 
 @font-face {
     font-family:
-        'Roboto
- Light';font-style:
- normal;
+        'RobotoLight';
+    font-style:normal;
     src: local('?'),
     url("{{url_for('static',filename='fonts/Roboto-Light.ttf')}}") format('truetype');
 }

@@ -12,6 +12,7 @@
         "index" : "index.html",
         "novnc" : "novnc.html",
         "astropanel" : "astropanel.html",
+        "gpspanel" : "gpspanel.html",
         "404" : "404.html",
         "500" : "500.html"
     }

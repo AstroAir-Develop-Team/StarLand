@@ -166,3 +166,28 @@ $(document).ready(function () {
         };
     });
 });
+
+function togglepolaris() {
+    document.getElementById("polaris").style.display = "block";
+    document.getElementById("moon").style.display = "none";
+    document.getElementById("sun").style.display = "none";
+    document.getElementById("planets").style.display = "none";
+}
+function togglemoon() {
+    document.getElementById("polaris").style.display = "none";
+    document.getElementById("moon").style.display = "block";
+    document.getElementById("sun").style.display = "none";
+    document.getElementById("planets").style.display = "none";
+}
+function togglesun() {
+    document.getElementById("polaris").style.display = "none";
+    document.getElementById("moon").style.display = "none";
+    document.getElementById("sun").style.display = "block";
+    document.getElementById("planets").style.display = "none";
+}
+function toggleplanets() {
+    document.getElementById("polaris").style.display = "none";
+    document.getElementById("moon").style.display = "none";
+    document.getElementById("sun").style.display = "none";
+    document.getElementById("planets").style.display = "block";
+}

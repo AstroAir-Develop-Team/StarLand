@@ -45,9 +45,13 @@ def novnc():
 def astropanel():
     return flask.render_template(config.assets["web"]["astropanel"])
 
-#@app.errorhandler(404)
-#def not_found(_):
-#    return flask.render_template(config.assets["web"]["404"])
+@app.route("/gpspanel")
+def gpspanel():
+    return flask.render_template(config.assets["web"]["gpspanel"])
+
+@app.errorhandler(404)
+def not_found(_):
+    return flask.render_template(config.assets["web"]["404"])
 
 @app.errorhandler(500)
 def server_error(_):
