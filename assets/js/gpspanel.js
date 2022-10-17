@@ -2,10 +2,10 @@ function LoadMap() {
     document.getElementById("map").firstChild.data = "";
 
     /* Set default to Warsaw, Poland */
-    var lon = 21.017532;
-    var lat = 52.237049;
+    let lon = 21.017532;
+    let lat = 52.237049;
 
-    var map = new ol.Map({
+    let map = new ol.Map({
         target: "map",
         layers: [
             new ol.layer.Tile({
@@ -26,7 +26,7 @@ function LoadMap() {
         geometry: center
     });
 
-    var iconStyle = new ol.style.Style({
+    let iconStyle = new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 1.0],
             anchorXUnits: 'fraction',
@@ -69,15 +69,15 @@ $(document).ready(function () {
         $("#vdop").html(gps.vdop);
 
         if (gps.gpstime) {
-            var d = new Date(gps.gpstime);
-            var date = d.getUTCFullYear() + "-" + ("0" + (d.getUTCMonth() + 1)).substr(-2) + "-" + ("0" + d.getUTCDate()).substr(-2) + "T" + ("0" + d.getUTCHours()).substr(-2) + ":" + ("0" + d.getUTCMinutes()).substr(-2) + ":" + ("0" + d.getUTCSeconds()).substr(-2);
+            let d = new Date(gps.gpstime);
+            let date = d.getUTCFullYear() + "-" + ("0" + (d.getUTCMonth() + 1)).substr(-2) + "-" + ("0" + d.getUTCDate()).substr(-2) + "T" + ("0" + d.getUTCHours()).substr(-2) + ":" + ("0" + d.getUTCMinutes()).substr(-2) + ":" + ("0" + d.getUTCSeconds()).substr(-2);
             $("#gtime").html(date);
         }
 
         if (gps.latitude && gps.longitude) {
-            var lat = gps.latitude;
-            var lon = gps.longitude;
-            var lat_sign, lon_sign;
+            let lat = gps.latitude;
+            let lon = gps.longitude;
+            let lat_sign, lon_sign;
 
             UpdateMapPos(lon, lat);
 
@@ -96,14 +96,14 @@ $(document).ready(function () {
             lat = Math.abs(lat);
             lon = Math.abs(lon);
 
-            latdeg = parseInt(lat);
-            latmin = parseInt((lat - latdeg) * 3600 / 60);
-            latsec = ((lat - latdeg - latmin / 60) * 3600).toFixed(4);
-            londeg = parseInt(lon);
-            lonmin = parseInt((lon - londeg) * 3600 / 60);
-            lonsec = ((lon - londeg - lonmin / 60) * 3600).toFixed(4);
-            latrad = lat_sign + latdeg + ":" + ("0" + latmin).substr(-2) + ":" + ("0" + latsec).substr(-7);
-            lonrad = lon_sign + londeg + ":" + ("0" + lonmin).substr(-2) + ":" + ("0" + lonsec).substr(-7);
+            let latdeg = parseInt(lat);
+            let latmin = parseInt((lat - latdeg) * 3600 / 60);
+            let latsec = ((lat - latdeg - latmin / 60) * 3600).toFixed(4);
+            let londeg = parseInt(lon);
+            let lonmin = parseInt((lon - londeg) * 3600 / 60);
+            let lonsec = ((lon - londeg - lonmin / 60) * 3600).toFixed(4);
+            let latrad = lat_sign + latdeg + ":" + ("0" + latmin).substr(-2) + ":" + ("0" + latsec).substr(-7);
+            let lonrad = lon_sign + londeg + ":" + ("0" + lonmin).substr(-2) + ":" + ("0" + lonsec).substr(-7);
             $("#lat").html(latrad);
             $("#lon").html(lonrad);
         }
@@ -117,8 +117,8 @@ $(document).ready(function () {
         }
 
         if (gps.satellites) {
-            var satellites = "<table><tr><th colspan=5 align=left><h2>Visible Satellites<h2></th></tr><tr><th>PRN</th><th>Elevation</th><th>Azimuth</th><th>SS</th><th>Used</th></tr>";
-            var used;
+            let satellites = "<table><tr><th colspan=5 align=left><h2>Visible Satellites<h2></th></tr><tr><th>PRN</th><th>Elevation</th><th>Azimuth</th><th>SS</th><th>Used</th></tr>";
+            let used;
             for (const sat in gps.satellites) {
                 if (gps.satellites[sat]['used']) {
                     used = 'Y';

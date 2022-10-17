@@ -67,7 +67,7 @@ $(document).ready(function () {
         $("#neptune_alt").html(data.neptune_alt);
 
         const pha = data.polaris_hour_angle;
-        var pha_angle = 360 + pha * -1;
+        let pha_angle = 360 + pha * -1;
         pha_angle -= 180;
         const rotation = "rotate(" + pha_angle + "deg)";
         $("#polaris_marker").css("-ms-transform", rotation);

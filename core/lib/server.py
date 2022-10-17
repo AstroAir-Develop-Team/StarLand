@@ -23,6 +23,8 @@ from gevent import pywsgi
 
 import config
 
+from core.lib.starlog import starlog
+
 # 初始化Flask服务器
 app = flask.Flask(__name__,static_folder="../../assets/",template_folder="../../assets/templates/")
 # Websocket服务
@@ -30,6 +32,8 @@ socketio = flask_socketio.SocketIO(app)
 # 不知道是什么的推荐的保护
 crfs = flask_wtf.csrf.CSRFProtect()
 crfs.init_app(app)
+
+log = starlog(__name__)
 
 @app.route("/")
 @crfs.exempt
@@ -62,7 +66,7 @@ class starserver():
         self.server = None
 
     def __del__(self):
-        pass
+        log.log("Server class deleted")
 
     def runserver(self,port=8000):
         self.server = pywsgi.WSGIServer(('127.0.0.1',port),app).serve_forever()

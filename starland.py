@@ -44,8 +44,6 @@ def load_assets():
             return True
         except IOError:
             log.loge("IOError when loaded assets/asset.json")
-        except BaseException:
-            log.loge("Unknown error when loaded assets/assets.json")
     else:
         log.loge("Could not find assets/assets.json,please check it!")
         return False
@@ -59,8 +57,6 @@ def load_config():
             return True
         except IOError:
             log.loge("IOError when loaded assets/config.json")
-        except BaseException:
-            log.loge("Unknown error when loaded assets/config.json")
     else:
         log.loge("Could not find assets/config.json,please check it!")
     return False
