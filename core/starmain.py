@@ -59,7 +59,7 @@ class starmain(wx.Frame):
         self.pnl.m_main_starinfo = m_starinfo_panel(self.pnl.m_main_starinfo)
         
         self.pnl.m_main_weather = m_weather_panel(self.pnl.m_main_weather)
-        #self.weather_icon = wx.Bitmap(config.assets["textures"]["uicon"]["main"]["weather"],wx.BITMAP_TYPE_ANY)
+
         self.pnl.m_main_server = m_server_panel(self.pnl.m_main_server)
         
         self.pnl.m_main_device = stardevice(self.pnl.m_main_device)

@@ -44,7 +44,7 @@ def load_assets():
             return True
         except IOError:
             log.loge("IOError when loaded assets/asset.json")
-        except:
+        except BaseException:
             log.loge("Unknown error when loaded assets/assets.json")
     else:
         log.loge("Could not find assets/assets.json,please check it!")
@@ -59,7 +59,7 @@ def load_config():
             return True
         except IOError:
             log.loge("IOError when loaded assets/config.json")
-        except:
+        except BaseException:
             log.loge("Unknown error when loaded assets/config.json")
     else:
         log.loge("Could not find assets/config.json,please check it!")
@@ -71,9 +71,7 @@ def main():
             log.log("Loading starland ui and server , please wait for a moment")
             log.log(f"System info : {sys.version}")
             log.log(f"Wx version : {wx.version()}")
-            #eval("from core.starloader import starloader")
-            #mod = importlib.import_module("core.starloader")
-            #eval("")
+
             app = wx.App()
             exec("mod = importlib.import_module('core.starloader')")
             frame = eval("mod.starloader(None)")

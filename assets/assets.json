@@ -1,4 +1,5 @@
 {
+    "author" : "Max Qian",
     "textures" : {
         "icon" : "assets/textures/icon.ico",
         "background" : "assets/textures/background.png",

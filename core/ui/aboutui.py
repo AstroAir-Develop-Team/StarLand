@@ -18,6 +18,8 @@ Boston, MA 02110-1301, USA.
 import wx
 import wx.adv
 
+__author__ = "Max Qian"
+
 class m_ahout_ui(wx.adv.AboutDialogInfo):
 
     def __init__(self, *args, **kwargs):
@@ -49,12 +51,12 @@ class m_ahout_ui(wx.adv.AboutDialogInfo):
         info.SetName('Star Hunter')
         info.SetVersion('Indev')
         info.SetDescription(description)
-        info.SetCopyright('(C) 2022 Max Qian')
+        info.SetCopyright(f'(C) 2022 {__author__}')
         info.SetWebSite('https://astroair.cn')
         info.SetLicence(licence)
-        info.AddDeveloper('Max Qian')
-        info.AddDocWriter('Max Qian')
-        info.AddArtist('Max Qian')
-        info.AddTranslator('Max Qian')
+        info.AddDeveloper(__author__)
+        info.AddDocWriter(__author__)
+        info.AddArtist(__author__)
+        info.AddTranslator(__author__)
 
         wx.adv.AboutBox(info)

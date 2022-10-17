@@ -25,7 +25,6 @@ import config
 
 # 初始化Flask服务器
 app = flask.Flask(__name__,static_folder="../../assets/",template_folder="../../assets/templates/")
-app.config['WTF_CSRF_ENABLED'] = False
 # Websocket服务
 socketio = flask_socketio.SocketIO(app)
 # 不知道是什么的推荐的保护
@@ -65,6 +64,6 @@ class starserver():
     def __del__(self):
         pass
 
-    def runserver(self,host="127.0.0.1",port=8000):
+    def runserver(self,port=8000):
         self.server = pywsgi.WSGIServer(('127.0.0.1',port),app).serve_forever()
           
