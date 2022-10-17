@@ -5,7 +5,7 @@ function LoadMap() {
     var lon = 21.017532;
     var lat = 52.237049;
 
-    map = new ol.Map({
+    var map = new ol.Map({
         target: "map",
         layers: [
             new ol.layer.Tile({
@@ -18,11 +18,11 @@ function LoadMap() {
         })
     });
 
-    var center = new ol.geom.Point(
+    let center = new ol.geom.Point(
         ol.proj.transform([lon, lat], 'EPSG:4326', 'EPSG:3857')
     );
 
-    iconFeature = new ol.Feature({
+    let iconFeature = new ol.Feature({
         geometry: center
     });
 
@@ -37,11 +37,11 @@ function LoadMap() {
 
     iconFeature.setStyle(iconStyle);
 
-    var vectorSource = new ol.source.Vector({
+    let vectorSource = new ol.source.Vector({
         features: [iconFeature]
     });
 
-    var vectorLayer = new ol.layer.Vector({
+    let vectorLayer = new ol.layer.Vector({
         source: vectorSource
     });
 
@@ -57,8 +57,8 @@ function UpdateMapPos(lon, lat) {
 }
 
 $(document).ready(function () {
-    var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
-    var socket = io.connect(url, { path: location.pathname + '/socket.io' });
+    const url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
+    const socket = io.connect(url, { path: location.pathname + '/socket.io' });
     socket.on('gpsdata', function (gps) {
         $("#gpstime").html(gps.gpstime);
         $("#latitude").html(gps.latitude);

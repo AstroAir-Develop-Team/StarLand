@@ -1,6 +1,6 @@
 $(document).ready(function () {
-    var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
-    var socket = io.connect(url, { path: location.pathname + '/socket.io' });
+    const url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
+    const socket = io.connect(url, { path: location.pathname + '/socket.io' });
     socket.on('emit', function () {
         client.emit('PING');
     });
@@ -66,25 +66,24 @@ $(document).ready(function () {
         $("#neptune_az").html(data.neptune_az);
         $("#neptune_alt").html(data.neptune_alt);
 
-        var pha = data.polaris_hour_angle;
-        pha_angle = 360 + pha * -1;
+        const pha = data.polaris_hour_angle;
+        var pha_angle = 360 + pha * -1;
         pha_angle -= 180;
-        var rotation = "rotate(" + pha_angle + "deg)";
+        const rotation = "rotate(" + pha_angle + "deg)";
         $("#polaris_marker").css("-ms-transform", rotation);
         $("#polaris_marker").css("-webkit-transform", rotation);
         $("#polaris_marker").css("transform", rotation);
 
-        var pha = data.polaris_hour_angle;
-        var phaH = String(parseInt(pha / 15));
-        var phaMtmp = (pha / 15 - phaH) * 60;
-        var phaM = String(parseInt(phaMtmp));
-        var phaS = String(parseInt((phaMtmp - phaM) * 60));
+        const phaH = String(parseInt(pha / 15));
+        const phaMtmp = (pha / 15 - phaH) * 60;
+        const phaM = String(parseInt(phaMtmp));
+        const phaS = String(parseInt((phaMtmp - phaM) * 60));
         $("#pha").html(phaH.padStart(2, '0') + ":" + phaM.padStart(2, '0') + ":" + phaS.padStart(2, '0'));
 
-        var pnt = data.polaris_next_transit.split(':');
-        var p9h = (parseInt(pnt[0]) - 6);
-        var p12h = (parseInt(pnt[0]) - 12);
-        var p3h = (parseInt(pnt[0]) - 18);
+        const pnt = data.polaris_next_transit.split(':');
+        const p9h = (parseInt(pnt[0]) - 6);
+        const p12h = (parseInt(pnt[0]) - 12);
+        const p3h = (parseInt(pnt[0]) - 18);
         $("#polaris_next_3").html(p3h + ':' + pnt[1] + ':' + pnt[2]);
         $("#polaris_next_12").html(p12h + ':' + pnt[1] + ':' + pnt[2]);
         $("#polaris_next_9").html(p9h + ':' + pnt[1] + ':' + pnt[2]);
@@ -145,8 +144,8 @@ $(document).ready(function () {
             $("#neptune").css("color", "#fff");
         }
 
-        var ss = new Date(data.sun_solstice);
-        var se = new Date(data.sun_equinox);
+        const ss = new Date(data.sun_solstice);
+        const se = new Date(data.sun_equinox);
         if (ss < se) {
             $("#sun_solstice_first").css("display", "");
             $("#sun_solstice_second").css("display", "none");
@@ -155,8 +154,8 @@ $(document).ready(function () {
             $("#sun_solstice_second").css("display", "");
         };
 
-        var nm = new Date(data.moon_new);
-        var fm = new Date(data.moon_full);
+        const nm = new Date(data.moon_new);
+        const fm = new Date(data.moon_full);
         if (nm < fm) {
             $("#new_moon_first").css("display", "");
             $("#new_moon_second").css("display", "none");
