@@ -41,11 +41,11 @@ class Qweather():
             requests.get("https://www.baidu.com")
             return True
         except requests.exceptions.ConnectionError:
-            log.log("Could not connect www.baidu.com , please check your internet connection")
+            log.loge("Could not connect www.baidu.com , please check your internet connection")
         except requests.exceptions.HTTPError:
-            log.log("Http Error when checked connection")
+            log.loge("Http Error when checked connection")
         except requests.exceptions.ConnectTimeout:
-            log.log("Timeout")
+            log.loge("Timeout")
         except:
             log.log("Unknown error during checking connection")
         return False
@@ -69,12 +69,12 @@ class Qweather():
                 with open(config.config_data["config"]["qweather"][0],"w+",encoding="utf-8") as file:
                     # 将数据格式化输出，默认4个空格
                     file.write(json.dumps(data,indent=4,ensure_ascii=False))
+                return data["country"] + data["regionName"] + data["city"]    
             # 连接错误
             except requests.exceptions.ConnectionError:
-                log.log("Could not connect Location server,please check Internet connnection!")
-            return data["country"] + data["regionName"] + data["city"]
+                log.loge("Could not connect Location server,please check Internet connnection!")
         else:
-            log.log("No internet connected,Could not use locate function")
+            log.loge("No internet connected,Could not use locate function")
     
     # 每日一言，有一部分是傻波语录
     def hitokoto(self):
@@ -88,8 +88,23 @@ class Qweather():
                 if not speaker:
                     speaker = "noname"
                 log.log(f'A single sentence every day : {text}  --{speaker}')
+                return f'{text} -- {speaker}'
             except requests.exceptions.ConnectionError:
-                log.log("Could not connect Hitokoto server,please check Internet connnection!")
-            return f'{text} -- {speaker}'
+                log.loge("Could not connect Hitokoto server,please check Internet connnection!")
+            except requests.exceptions.ProxyError:
+                log.loge("Proxy error when got hitotoko")
         else:
-            log.log("No internet connected,Could not use hitokoto function")
+            log.loge("No internet connected,Could not use hitokoto function")
+
+    # 获取天气数据 - 来自和风天气
+    def get_weather(self):
+        if self.is_internet_connected:
+            try:
+                response = requests.get("")
+            except requests.exceptions.ConnectionError:
+                log.loge("Could not connect Qweather server,please check Internet connnection!")
+            except requests.exceptions.ProxyError:
+                log.loge("Proxy error when got Qweather infomation")
+            pass
+        else:
+            log.loge("No internet connected,Could not use Qweather function")

@@ -69,8 +69,11 @@ def main():
             log.log(f"Wx version : {wx.version()}")
 
             app = wx.App()
-            exec("mod = importlib.import_module('core.starloader')")
-            frame = eval("mod.starloader(None)")
+            try:
+                exec("mod = importlib.import_module('core.starloader')")
+                frame = eval("mod.starloader(None)")
+            except ImportError:
+                log.loge("Could not find core.starloader,please check it ,if there is any unknwon problem ,please contact the developer")
             
             frame.Show()
             app.MainLoop()

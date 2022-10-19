@@ -15,16 +15,17 @@ the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
 """
 
-import wx,wx.adv
+import wx
+from wx.adv import TaskBarIcon
 
 import config
 
-class m_taskbar_icon(wx.adv.TaskBarIcon):
+class m_taskbar_icon(TaskBarIcon):
     TBMENU_CLOSE   = wx.NewIdRef()
     TBMENU_REMOVE  = wx.NewIdRef()
 
     def __init__(self,frame):
-        wx.adv.TaskBarIcon.__init__(self, wx.adv.TBI_DOCK)
+        TaskBarIcon.__init__(self, wx.adv.TBI_DOCK)
         self.frame = frame
         # 设置图标
         self.SetIcon(wx.Bitmap(config.assets["textures"]["icon"],wx.BITMAP_TYPE_ANY), "StarHunter")

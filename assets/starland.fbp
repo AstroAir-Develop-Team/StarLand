@@ -3363,7 +3363,7 @@
                 </object>
             </object>
         </object>
-        <object class="Frame" expanded="0">
+        <object class="Frame" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -3397,7 +3397,7 @@
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
                 <object class="sizeritem" expanded="0">
-                    <property name="border">5</property>
+                    <property name="border">0</property>
                     <property name="flag">wxEXPAND | wxALL</property>
                     <property name="proportion">1</property>
                     <object class="wxNotebook" expanded="0">
@@ -3807,7 +3807,7 @@
                     </object>
                 </object>
             </object>
-            <object class="wxMenuBar" expanded="0">
+            <object class="wxMenuBar" expanded="1">
                 <property name="bg"></property>
                 <property name="context_help"></property>
                 <property name="context_menu">1</property>
@@ -3845,6 +3845,359 @@
                         <property name="shortcut">ALT + F4</property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">on_exit_selected</event>
+                    </object>
+                </object>
+                <object class="wxMenu" expanded="1">
+                    <property name="label">界面</property>
+                    <property name="name">m_menu_gui</property>
+                    <property name="permission">protected</property>
+                    <object class="submenu" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="label">设备</property>
+                        <property name="name">m_menu_device</property>
+                        <property name="permission">protected</property>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">相机</property>
+                            <property name="name">m_menuItem_camera</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">赤道仪</property>
+                            <property name="name">m_menuItem__mount</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">导星</property>
+                            <property name="name">m_menuItem_guider</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">电调</property>
+                            <property name="name">m_menuItem_focuser</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">校准</property>
+                            <property name="name">m_menuItem_align</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                    </object>
+                    <object class="submenu" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="label">天气</property>
+                        <property name="name">m_menu_weather</property>
+                        <property name="permission">protected</property>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">和风天气</property>
+                            <property name="name">m_menuItem_qweather</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">在线云图</property>
+                            <property name="name">m_menuItem_windy</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                    </object>
+                    <object class="submenu" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="label">天体搜索</property>
+                        <property name="name">m_menu_search</property>
+                        <property name="permission">protected</property>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">离线搜索</property>
+                            <property name="name">m_menuItem_offline</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">在线搜索</property>
+                            <property name="name">m_menuItem_online</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                    </object>
+                    <object class="submenu" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="label">天体信息</property>
+                        <property name="name">m_menu_starinfo</property>
+                        <property name="permission">protected</property>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">太阳</property>
+                            <property name="name">m_menuItem_sun</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">月球</property>
+                            <property name="name">m_menuItem_moon</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="submenu" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="label">太阳系</property>
+                            <property name="name">m_menu_solar</property>
+                            <property name="permission">protected</property>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">水星</property>
+                                <property name="name">m_menuItem_mercury</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">金星</property>
+                                <property name="name">m_menuItem_venus</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">地球</property>
+                                <property name="name">m_menuItem_earth</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">火星</property>
+                                <property name="name">m_menuItem_mars</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">木星</property>
+                                <property name="name">m_menuItem_jupiter</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">土星</property>
+                                <property name="name">m_menuItem_satura</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">天王星</property>
+                                <property name="name">m_menuItem_urance</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                            <object class="wxMenuItem" expanded="1">
+                                <property name="bitmap"></property>
+                                <property name="checked">0</property>
+                                <property name="enabled">1</property>
+                                <property name="help"></property>
+                                <property name="id">wxID_ANY</property>
+                                <property name="kind">wxITEM_NORMAL</property>
+                                <property name="label">海王星</property>
+                                <property name="name">m_menuItem_neptune</property>
+                                <property name="permission">none</property>
+                                <property name="shortcut"></property>
+                                <property name="unchecked_bitmap"></property>
+                            </object>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">极轴</property>
+                            <property name="name">m_menuItem_polar</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                    </object>
+                    <object class="submenu" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="label">服务器</property>
+                        <property name="name">m_menu_server</property>
+                        <property name="permission">protected</property>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">内置</property>
+                            <property name="name">m_menuItem_native</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">Ascom</property>
+                            <property name="name">m_menuItem_ascom</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">INDI</property>
+                            <property name="name">m_menuItem_indi</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help"></property>
+                            <property name="id">wxID_ANY</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">noVNC</property>
+                            <property name="name">m_menuItem_novnc</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                        </object>
                     </object>
                 </object>
                 <object class="wxMenu" expanded="0">

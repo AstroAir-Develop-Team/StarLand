@@ -82,6 +82,99 @@ class starmain(wx.Frame):
 
         self.m_menubar.Append( self.m_menu_file, u"文件" )
 
+        self.m_menu_gui = wx.Menu()
+        self.m_menu_device = wx.Menu()
+        self.m_menuItem_camera = wx.MenuItem( self.m_menu_device, wx.ID_ANY, u"相机", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_device.Append( self.m_menuItem_camera )
+
+        self.m_menuItem__mount = wx.MenuItem( self.m_menu_device, wx.ID_ANY, u"赤道仪", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_device.Append( self.m_menuItem__mount )
+
+        self.m_menuItem_guider = wx.MenuItem( self.m_menu_device, wx.ID_ANY, u"导星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_device.Append( self.m_menuItem_guider )
+
+        self.m_menuItem_focuser = wx.MenuItem( self.m_menu_device, wx.ID_ANY, u"电调", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_device.Append( self.m_menuItem_focuser )
+
+        self.m_menuItem_align = wx.MenuItem( self.m_menu_device, wx.ID_ANY, u"校准", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_device.Append( self.m_menuItem_align )
+
+        self.m_menu_gui.AppendSubMenu( self.m_menu_device, u"设备" )
+
+        self.m_menu_weather = wx.Menu()
+        self.m_menuItem_qweather = wx.MenuItem( self.m_menu_weather, wx.ID_ANY, u"和风天气", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_weather.Append( self.m_menuItem_qweather )
+
+        self.m_menuItem_windy = wx.MenuItem( self.m_menu_weather, wx.ID_ANY, u"在线云图", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_weather.Append( self.m_menuItem_windy )
+
+        self.m_menu_gui.AppendSubMenu( self.m_menu_weather, u"天气" )
+
+        self.m_menu_search = wx.Menu()
+        self.m_menuItem_offline = wx.MenuItem( self.m_menu_search, wx.ID_ANY, u"离线搜索", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_search.Append( self.m_menuItem_offline )
+
+        self.m_menuItem_online = wx.MenuItem( self.m_menu_search, wx.ID_ANY, u"在线搜索", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_search.Append( self.m_menuItem_online )
+
+        self.m_menu_gui.AppendSubMenu( self.m_menu_search, u"天体搜索" )
+
+        self.m_menu_starinfo = wx.Menu()
+        self.m_menuItem_sun = wx.MenuItem( self.m_menu_starinfo, wx.ID_ANY, u"太阳", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_starinfo.Append( self.m_menuItem_sun )
+
+        self.m_menuItem_moon = wx.MenuItem( self.m_menu_starinfo, wx.ID_ANY, u"月球", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_starinfo.Append( self.m_menuItem_moon )
+
+        self.m_menu_solar = wx.Menu()
+        self.m_menuItem_mercury = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"水星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_mercury )
+
+        self.m_menuItem_venus = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"金星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_venus )
+
+        self.m_menuItem_earth = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"地球", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_earth )
+
+        self.m_menuItem_mars = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"火星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_mars )
+
+        self.m_menuItem_jupiter = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"木星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_jupiter )
+
+        self.m_menuItem_satura = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"土星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_satura )
+
+        self.m_menuItem_urance = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"天王星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_urance )
+
+        self.m_menuItem_neptune = wx.MenuItem( self.m_menu_solar, wx.ID_ANY, u"海王星", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_solar.Append( self.m_menuItem_neptune )
+
+        self.m_menu_starinfo.AppendSubMenu( self.m_menu_solar, u"太阳系" )
+
+        self.m_menuItem_polar = wx.MenuItem( self.m_menu_starinfo, wx.ID_ANY, u"极轴", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_starinfo.Append( self.m_menuItem_polar )
+
+        self.m_menu_gui.AppendSubMenu( self.m_menu_starinfo, u"天体信息" )
+
+        self.m_menu_server = wx.Menu()
+        self.m_menuItem_native = wx.MenuItem( self.m_menu_server, wx.ID_ANY, u"内置", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_server.Append( self.m_menuItem_native )
+
+        self.m_menuItem_ascom = wx.MenuItem( self.m_menu_server, wx.ID_ANY, u"Ascom", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_server.Append( self.m_menuItem_ascom )
+
+        self.m_menuItem_indi = wx.MenuItem( self.m_menu_server, wx.ID_ANY, u"INDI", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_server.Append( self.m_menuItem_indi )
+
+        self.m_menuItem_novnc = wx.MenuItem( self.m_menu_server, wx.ID_ANY, u"noVNC", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menu_server.Append( self.m_menuItem_novnc )
+
+        self.m_menu_gui.AppendSubMenu( self.m_menu_server, u"服务器" )
+
+        self.m_menubar.Append( self.m_menu_gui, u"界面" )
+
         self.m_menu_help = wx.Menu()
         self.m_menuItem_ahout = wx.MenuItem( self.m_menu_help, wx.ID_ANY, u"关于", wx.EmptyString, wx.ITEM_NORMAL )
         self.m_menuItem_ahout.SetBitmap(wx.Bitmap(config.assets["textures"]["menu"]["about"],wx.BITMAP_TYPE_PNG))

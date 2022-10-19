@@ -15,16 +15,17 @@ the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
 """
 
-import wx,wx.adv
+import wx
+from wx.adv import SplashScreen
 
 import config
 
 from core.ui.loaderui import my_loader_panel
 
-class m_splash_screen(wx.adv.SplashScreen):
+class m_splash_screen(SplashScreen):
     def __init__(self):
         bmp = wx.Image(wx.opj(config.assets["textures"]["splash"])).ConvertToBitmap()
-        wx.adv.SplashScreen.__init__(self, bmp,
+        SplashScreen.__init__(self, bmp,
                                  wx.adv.SPLASH_CENTRE_ON_SCREEN | wx.adv.SPLASH_TIMEOUT,
                                  5000, None, -1)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
