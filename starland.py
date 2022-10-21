@@ -1,7 +1,9 @@
 # coding=utf-8
 
 """
+
 Copyright(c) 2022 Max Qian  <astroair.cn>
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
 License version 3 as published by the Free Software Foundation.
@@ -13,76 +15,78 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
+
 """
 
 import wx
-import os,json,sys,importlib
+import os,json,sys,importlib,signal
 
 from core.lib.starlog import starlog
 
 import config
+
 log = starlog(__name__)
 
-# 加载材质配置
-def load_assets():
-    if os.path.isfile("assets/assets.json"):
+# 加载文件
+def _load_(path,filename) -> (str):
+    if os.path.isfile(os.path.join(path,filename)):
         try:
-            with open("assets/assets.json",mode="r",encoding="utf-8") as file:
-                config.assets = json.load(file)
-                log.log("Loaded asset config ,try to check all of the files")
-            """
-            此处有大问题，遍历多层字典
-            for value in config.assets.values():
-                dic = value.values()
-                for i in range(len(dic)):
-                    file = list(dic)[i]
-                    if not os.path.isfile(file):
-                        log.log(f"Could not find {file}")
-                        raise FileNotFoundError(f"{file}")
-                log.log("All file check passed")
-            """
-            return True
+            with open(os.path.join(path,filename),mode="r",encoding="utf-8") as file:
+                data = json.load(file)
+                log.log(f"Loaded {filename} in {path}")
+                return data
         except IOError:
-            log.loge("IOError when loaded assets/asset.json")
+            log.loge(f"IOError when load {filename}")
     else:
-        log.loge("Could not find assets/assets.json,please check it!")
-        return False
+        log.loge(f"Could not find {filename} in {path}")
 
-# 加载本体配置
-def load_config():
-    if os.path.isfile("assets/config.json"):
-        try:
-            with open("assets/config.json",mode="r",encoding="utf-8") as file:
-                config.config_data  = json.load(file)
-            return True
-        except IOError:
-            log.loge("IOError when loaded assets/config.json")
-    else:
-        log.loge("Could not find assets/config.json,please check it!")
-    return False
+# 检查目录下文件是否完整
+# 此处未写完，仅限占位
+def _check_(path,dic={}):
+    for i in dic.values():
+        if os.path.isfile(i):
+            log.log(f"Find {i}")
 
+# 停止运行
+def shutdown():
+    log.log("Shutdown by user,good bye!")
+    exit(0)
+
+# 终端句柄
+def term_handler(signum, frame):
+	raise KeyboardInterrupt
+# 事件绑定 - 有问题，没有效果
+signal.signal(signal.SIGTERM, term_handler)
+
+# 主函数
 def main():
-    try:
-        if load_assets() and load_config():
-            log.log("Loading starland ui and server , please wait for a moment")
-            log.log(f"System info : {sys.version}")
-            log.log(f"Wx version : {wx.version()}")
+    # 加载配置
+    config.assets = _load_("assets","assets.json")
+    config.config_data = _load_("assets","config.json")
+    if len(config.assets) != 0 and len(config.config_data) != 0:
+        # 输出一些基本信息
+        log.log("Loading starland ui and server , please wait for a moment")
+        log.log(f"System info : {sys.version}")
+        log.log(f"Wx version : {wx.version()}")
+        # 创建实例
+        app = wx.App()
+        # 先加载模组界面
+        try:
+            mod = importlib.import_module('core.starloader')
+        except ImportError:
+            log.loge("Could not find core.starloader,please check it ,if there is any unknwon problem ,please contact the developer")
+        frame = mod.starloader(None)
+        frame.Show()
+        # 主循环
+        app.MainLoop()
+    else:
+        log.loge("Config data is empty,something is going wrong!")
+        raise Exception("Please check your config file!")
 
-            app = wx.App()
-            try:
-                exec("mod = importlib.import_module('core.starloader')")
-                frame = eval("mod.starloader(None)")
-            except ImportError:
-                log.loge("Could not find core.starloader,please check it ,if there is any unknwon problem ,please contact the developer")
-            
-            frame.Show()
-            app.MainLoop()
-        else:
-            log.loge("Fail ,redo")
-    except KeyboardInterrupt:
-        log.loge("Shutdown by user,bye.")
-        
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        shutdown()
 else:
-    log.log("Please run in main thread")
+    log.loge("Please run in main thread")

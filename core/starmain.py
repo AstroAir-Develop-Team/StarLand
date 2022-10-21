@@ -21,8 +21,8 @@ import threading
 # 所有的内置UI
 from core.ui.mainui import m_main_panel
 from core.ui.starinfoui import m_starinfo_panel
-from core.ui.weatherui import m_weather_panel
 from core.ui.serverui import m_server_panel
+from core.starweather import starweather
 from core.stardevice import stardevice
 
 from core.ui.taskbaricon import m_taskbar_icon
@@ -58,7 +58,7 @@ class starmain(wx.Frame):
 
         self.pnl.m_main_starinfo = m_starinfo_panel(self.pnl.m_main_starinfo)
         
-        self.pnl.m_main_weather = m_weather_panel(self.pnl.m_main_weather)
+        self.pnl.m_main_weather = starweather(self.pnl.m_main_weather)
 
         self.pnl.m_main_server = m_server_panel(self.pnl.m_main_server)
         

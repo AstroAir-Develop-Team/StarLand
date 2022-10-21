@@ -20,14 +20,14 @@ from wx.adv import SplashScreen
 
 import config
 
-from core.ui.loaderui import my_loader_panel
-
 class m_splash_screen(SplashScreen):
-    def __init__(self):
-        bmp = wx.Image(wx.opj(config.assets["textures"]["splash"])).ConvertToBitmap()
+
+    def __init__(self,frame) -> (wx.Panel):
+        self.frame = frame
+        bmp = wx.Bitmap(config.assets["textures"]["splash"],wx.BITMAP_TYPE_PNG)
         SplashScreen.__init__(self, bmp,
                                  wx.adv.SPLASH_CENTRE_ON_SCREEN | wx.adv.SPLASH_TIMEOUT,
-                                 5000, None, -1)
+                                 2000, None, -1)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.fc = wx.CallLater(1000, self.ShowMain)
 
@@ -39,8 +39,6 @@ class m_splash_screen(SplashScreen):
             self.ShowMain()
 
     def ShowMain(self):
-        frame = wx.Frame(None)
-        frame.Show()
+        self.frame.Show()
         if self.fc.IsRunning():
             self.Raise()
-        wx.CallAfter(frame.ShowTip)

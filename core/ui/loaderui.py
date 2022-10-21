@@ -1,4 +1,5 @@
 import wx
+import config
 
 ###########################################################################
 ## Class m_mod_main
@@ -8,6 +9,8 @@ class my_loader_panel ( wx.Panel ):
 
 	def __init__( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 500,300 ), style = wx.TAB_TRAVERSAL, name = wx.EmptyString ):
 		wx.Panel.__init__ ( self, parent, id = id, pos = pos, size = size, style = style, name = name )
+
+		self.Bind(wx.EVT_ERASE_BACKGROUND,self.on_eraze_background)
 
 		m_mod_container = wx.FlexGridSizer( 0, 1, 0, 0 )
 		m_mod_container.SetFlexibleDirection( wx.BOTH )
@@ -26,7 +29,6 @@ class my_loader_panel ( wx.Panel ):
 		m_loader_title.SetFlexibleDirection( wx.BOTH )
 		m_loader_title.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-
 		m_loader_title.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
 		self.m_loader_icon = wx.StaticBitmap( self, wx.ID_ANY, wx.NullBitmap, wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -40,9 +42,7 @@ class my_loader_panel ( wx.Panel ):
 		self.m_loader_help = wx.BitmapButton( self, wx.ID_ANY, wx.NullBitmap, wx.DefaultPosition, wx.DefaultSize, wx.BU_AUTODRAW|0 )
 		m_loader_title.Add( self.m_loader_help, 0, wx.ALL, 5 )
 
-
 		m_loader_title.Add( ( 0, 0), 1, wx.EXPAND, 5 )
-
 
 		m_mod_loader.Add( m_loader_title, 1, wx.EXPAND, 5 )
 
@@ -57,7 +57,6 @@ class my_loader_panel ( wx.Panel ):
 		m_unuse_container.SetFlexibleDirection( wx.BOTH )
 		m_unuse_container.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-
 		self.m_loader_unuse.SetSizer( m_unuse_container )
 		self.m_loader_unuse.Layout()
 		m_unuse_container.Fit( self.m_loader_unuse )
@@ -71,12 +70,10 @@ class my_loader_panel ( wx.Panel ):
 		m_use_container.SetFlexibleDirection( wx.BOTH )
 		m_use_container.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-
 		self.m_loader_use.SetSizer( m_use_container )
 		self.m_loader_use.Layout()
 		m_use_container.Fit( self.m_loader_use )
 		m_loader_container.Add( self.m_loader_use, 1, wx.EXPAND |wx.ALL, 5 )
-
 
 		m_mod_loader.Add( m_loader_container, 1, wx.EXPAND, 5 )
 
@@ -100,7 +97,6 @@ class my_loader_panel ( wx.Panel ):
 		self.m_b_config = wx.Button( self, wx.ID_ANY, u"配置", wx.DefaultPosition, wx.DefaultSize, 0 )
 		m_b_container.Add( self.m_b_config, 0, wx.ALL, 5 )
 
-
 		m_loader_b_container.Add( m_b_container, 1, wx.EXPAND, 5 )
 
 		m_b_to_main = wx.FlexGridSizer( 0, 2, 0, 0 )
@@ -113,19 +109,25 @@ class my_loader_panel ( wx.Panel ):
 		self.m_b_opendic = wx.Button( self, wx.ID_ANY, u"打开文件夹", wx.DefaultPosition, wx.DefaultSize, 0 )
 		m_b_to_main.Add( self.m_b_opendic, 0, wx.ALL, 5 )
 
-
 		m_loader_b_container.Add( m_b_to_main, 1, wx.EXPAND, 5 )
-
 
 		m_mod_loader.Add( m_loader_b_container, 1, wx.EXPAND, 5 )
 
-
 		m_mod_container.Add( m_mod_loader, 1, wx.EXPAND, 5 )
-
 
 		self.SetSizer( m_mod_container )
 		self.Layout()
 
 	def __del__( self ):
 		pass
+
+	# 绘制背景图片
+	def on_eraze_background(self,event):
+		dc = event.GetDC()
+		if not dc:
+			dc = wx.ClientDC(self)
+			rect = self.GetUpdateRegion().GetBox()
+			dc.SetClippingRect(rect)
+			dc.Clear()
+		dc.DrawBitmap(wx.Bitmap(config.assets["textures"]["background"],wx.BITMAP_TYPE_BMP), 0, 0)
  

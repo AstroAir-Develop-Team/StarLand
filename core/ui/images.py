@@ -1,7 +1,9 @@
 # coding=utf-8
 
 """
+
 Copyright(c) 2022 Max Qian  <astroair.cn>
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
 License version 3 as published by the Free Software Foundation.
@@ -13,6 +15,7 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
+
 """
 
 from wx.lib.embeddedimage import PyEmbeddedImage

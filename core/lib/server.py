@@ -15,59 +15,65 @@ the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
 """
 
-import flask
-import flask_wtf
-import flask_socketio
-
-from gevent import pywsgi
+from flask import Flask,render_template
+from flask_wtf import CSRFProtect
+from flask_socketio import SocketIO
 
 import config
 
 from core.lib.starlog import starlog
 
 # 初始化Flask服务器
-app = flask.Flask(__name__,static_folder="../../assets/",template_folder="../../assets/templates/")
+app = Flask(__name__,static_folder="../../assets/",template_folder="../../assets/templates/")
 # Websocket服务
-socketio = flask_socketio.SocketIO(app)
+socketio = SocketIO(app)
 # 不知道是什么的推荐的保护
-crfs = flask_wtf.csrf.CSRFProtect()
+crfs = CSRFProtect()
 crfs.init_app(app)
 
 log = starlog(__name__)
 
+# 主页
 @app.route("/")
-@crfs.exempt
 def index():
-    return flask.render_template(config.assets["web"]["index"])
+    return render_template(config.assets["web"]["index"])
 
+# noVNC - 未来移植
 @app.route("/novnc")
 def novnc():
-    return flask.render_template(config.assets["web"]["novnc"])
+    return render_template(config.assets["web"]["novnc"])
 
+# Astropanel
 @app.route("/astropanel")
 def astropanel():
-    return flask.render_template(config.assets["web"]["astropanel"])
+    return render_template(config.assets["web"]["astropanel"])
 
+# GPSPanel
 @app.route("/gpspanel")
 def gpspanel():
-    return flask.render_template(config.assets["web"]["gpspanel"])
+    return render_template(config.assets["web"]["gpspanel"])
 
+# 404
 @app.errorhandler(404)
 def not_found(_):
-    return flask.render_template(config.assets["web"]["404"])
+    return render_template(config.assets["web"]["404"])
 
+# 500
 @app.errorhandler(500)
 def server_error(_):
-    return flask.render_template(config.assets["web"]["500"])
+    return render_template(config.assets["web"]["500"])
 
 class starserver():
 
     def __init__(self):
+        log.log("Init server and load config")
         self.server = None
 
     def __del__(self):
         log.log("Server class deleted")
 
-    def runserver(self,port=8000):
-        self.server = pywsgi.WSGIServer(('127.0.0.1',port),app).serve_forever()
+    # 运行服务器
+    def runserver(self,host="127.0.0.1",port=8000):
+        log.log(f"Start buildin server in {host} on {port}")
+        app.run(host=host,port=port,threaded=True)
           

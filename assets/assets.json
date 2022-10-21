@@ -2,7 +2,7 @@
     "author" : "Max Qian",
     "textures" : {
         "icon" : "assets/textures/icon.ico",
-        "background" : "assets/textures/background.png",
+        "background" : "assets/textures/background.bmp",
         "splash" : "assets/textures/splash.png",
         "menu" : {
             "exit" : "assets/textures/icon/m_menu_exit.png",
