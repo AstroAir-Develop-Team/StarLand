@@ -16,6 +16,7 @@ Boston, MA 02110-1301, USA.
 """
 
 from dataclasses import dataclass
+from genericpath import isfile
 from requests import get,exceptions
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -37,6 +38,8 @@ class QweatherInfo():
         self.name = ""          # 城市名称
         self.full_name = ""     # 城市全名（国家+省+城市）
         self.time = datetime.now().strftime("%Y%m%d")       # 当天日期
+        self.alt = ""           # 海拔
+        self.timezone = ""      # 时区
         self.data = {
             "status" : "",
             "content" : {}
@@ -49,6 +52,7 @@ class Qweather():
         
         config.threadpool.submit(self.get_location())
         config.threadpool.submit(self.hitokoto())
+        config.threadpool.submit(self.get_weather_qweater())
         pass
 
     def __del__(self):
@@ -67,7 +71,7 @@ class Qweather():
         except exceptions.ConnectTimeout:
             log.loge("Timeout")
         except:
-            log.log("Unknown error during checking connection")
+            log.loge("Unknown error during checking connection")
         return False
 
     # 获取定位
@@ -123,7 +127,7 @@ class Qweather():
             info = QweatherInfo()
             # 如果还未获取天气数据
             if len(info.data["content"]) == 0:
-                path = [config.config_data["config"]["qweather"][0],config.config_data["config"]["qweather"][1]]
+                path = [config.config_data["config"]["qweather"][0],config.config_data["config"]["qweather"][1],config.config_data["config"]["qweather"][2]]
                 if os.path.isfile(path[1]):
                     try:
                         # 读取所需的配置信息 - 密钥 + 证书
@@ -161,21 +165,40 @@ class Qweather():
                                 else:
                                     log.loge(f"Could not find {path[0]}")
                         # 和风天气所有天气API
-                        url_list = [
-                            f'https://devapi.qweather.com/v7/weather/now?key={info.key}&location={info.city_id}',
-                            f'https://devapi.qweather.com/v7/astronomy/sun?key={info.key}&location={info.city_id}&date={info.time}',
-                            f'https://devapi.qweather.com/v7/astronomy/moon?key={info.key}&location={info.city_id}&date={info.time}',
-                            f'https://devapi.qweather.com/v7/warning/now?key={info.key}&location={info.city_id}',
-                        ]
-                        # 太阳高度角需要商业证书才能获取
-                        # 此处需要补太阳高度角url
-                        if info.license == "business":
-                            url_list.append(f"")
+                        url_list = []
+                        if info.license == "dev":
+                            url_list = [
+                                f'https://devapi.qweather.com/v7/weather/now?key={info.key}&location={info.city_id}',
+                                f'https://devapi.qweather.com/v7/astronomy/sun?key={info.key}&location={info.city_id}&date={info.time}',
+                                f'https://devapi.qweather.com/v7/astronomy/moon?key={info.key}&location={info.city_id}&date={info.time}',
+                                f'https://devapi.qweather.com/v7/warning/now?key={info.key}&location={info.city_id}',
+                                f'https://devapi.qweather.com/v7/weather/7d?key={info.key}&location={info.city_id}'
+                            ]
+                            log.log("Chose developer key & license")
+                        elif info.license == "business":
+                            url_list = [
+                                f'https://api.qweather.com/v7/weather/now?key={info.key}&location={info.city_id}',
+                                f'https://api.qweather.com/v7/astronomy/sun?key={info.key}&location={info.city_id}&date={info.time}',
+                                f'https://api.qweather.com/v7/astronomy/moon?key={info.key}&location={info.city_id}&date={info.time}',
+                                f'https://api.qweather.com/v7/warning/now?key={info.key}&location={info.city_id}',
+                                f'https://api.qweather.com/v7/weather/7d?key={info.key}&location={info.city_id}',
+                                f"https://api.qweather.com/v7/astronomy/solar-elevation-angle?key={info.key}&location={info.city_id}&date={info.time}&tz={info.timezone}&alt={info.alt}"
+                            ]
+                            log.log("Chose business key & license")
+                        else:
+                            log.logw("Unknown license,choose default key & license")
                         # 多线程
                         weather_thread = ThreadPoolExecutor(max_workers=5)
-                        weather_thread.map(self._load_from_internet_,url_list)
-                        # 此处需要增加获取返回值
+                        results = weather_thread.map(self._load_from_internet_,url_list)
+                        # 读取返回的结果
+                        result_name = ["now","sun","moon","warning","7d"]
+                        for item,result_type in zip(results,result_name):
+                            info.data["content"][result_type] = item
                         info.data["status"] = "successful"
+                        # 保存数据
+                        with open(path[2],mode="w+",encoding="utf-8") as file:
+                            json.dump(info.data,file,indent=4,ensure_ascii=False)
+
                         return info.data
                     except IOError:
                         log.loge("IOError when load Qweather")
@@ -199,9 +222,19 @@ class Qweather():
             return {"status":"error"}
     
     # 从网络中下载数据
-    def _load_from_internet_(self,url) -> (str):
+    def _load_from_internet_(self,url) -> str:
         try:
             response = get(url).json()
             return response
         except exceptions.ConnectionError:
             log.loge(f"Failed to get from {url}")
+
+    # 从文件中获取数据
+    def _load_from_file(self,filename) -> str:
+        if os.path.isfile(filename):
+            with open(filename,mode="r",encoding="utf-8") as file:
+                data = json.load(file)
+            log.log(f"Loaded {filename}")
+            return data
+        else:
+            log.loge(f"Failed to find {filename}")

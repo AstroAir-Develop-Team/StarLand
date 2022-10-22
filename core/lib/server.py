@@ -25,6 +25,10 @@ from core.lib.starlog import starlog
 
 # 初始化Flask服务器
 app = Flask(__name__,static_folder="../../assets/",template_folder="../../assets/templates/")
+app.config.update(
+    SECRET_KEY = "starland",
+    SESSION_COOKIE_NAME = "starland"
+)
 # Websocket服务
 socketio = SocketIO(app)
 # 不知道是什么的推荐的保护
