@@ -18,6 +18,9 @@ Boston, MA 02110-1301, USA.
 import wx
 import wx.adv
 
+import gettext
+_ = gettext.gettext
+
 __author__ = "Max Qian"
 
 class m_ahout_ui(wx.adv.AboutDialogInfo):
@@ -27,10 +30,10 @@ class m_ahout_ui(wx.adv.AboutDialogInfo):
 
     def OnAboutBox(self):
 
-        description = """Star Hunter is a new generation of astronomical photography terminal. 
+        description = _("""Star Hunter is a new generation of astronomical photography terminal. 
             It is lightweight, yet rich in functions, simple and beautiful. 
             It is your good helper on the astronomical photography road
-            """
+            """)
 
         licence = """Star Hunter is free software; you can redistribute
             it and/or modify it under the terms of the GNU General Public License as

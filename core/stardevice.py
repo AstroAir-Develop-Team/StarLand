@@ -17,6 +17,9 @@ Boston, MA 02110-1301, USA.
 
 import wx
 
+import gettext
+_ = gettext.gettext
+
 import core.ui.images as imglib
 
 class stardevice(wx.Panel):
@@ -47,11 +50,11 @@ class stardevice(wx.Panel):
 
         self.m_device_listbook.AssignImageList(lb_icon)
 
-        self.m_device_listbook.AddPage( self.m_camera, u"相机", True ,imageId=0)
-        self.m_device_listbook.AddPage( self.m_mount, u"赤道仪", False ,imageId=1)
-        self.m_device_listbook.AddPage( self.m_guider, u"导星", False ,imageId=2)
-        self.m_device_listbook.AddPage( self.m_focuser, u"电调", False ,imageId=3)
-        self.m_device_listbook.AddPage( self.m_align, u"校准", False ,imageId=4)
+        self.m_device_listbook.AddPage( self.m_camera, _(u"相机"), True ,imageId=0)
+        self.m_device_listbook.AddPage( self.m_mount, _(u"赤道仪"), False ,imageId=1)
+        self.m_device_listbook.AddPage( self.m_guider, _(u"导星"), False ,imageId=2)
+        self.m_device_listbook.AddPage( self.m_focuser, _(u"电调"), False ,imageId=3)
+        self.m_device_listbook.AddPage( self.m_align, _(u"校准"), False ,imageId=4)
 
         m_device_container.Add( self.m_device_listbook, 1, wx.EXPAND |wx.ALL, 5 )
 

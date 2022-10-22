@@ -27,58 +27,79 @@ from core.starmain import starmain
 
 import config
 
+import gettext
+_ = gettext.gettext
+
 log = starlog(__name__)
 
-class starloader(wx.Frame):
+class starloader(my_loader_panel):
 
-    def __init__(self, parent):
-        # 初始化框架
-        wx.Frame.__init__(self,parent,title = u"模组加载",pos = wx.DefaultPosition, size = wx.Size( 650,360 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
+    def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size( 640,360 ), style=wx.TAB_TRAVERSAL, name=wx.EmptyString):
         
-        # 模组加载界面
-        self.pnl = my_loader_panel(self)
-        self.is_opened = False
-        # 设置图标
-        self.SetIcon(wx.Icon(config.assets["textures"]["icon"]))
+        super().__init__(parent, id, pos, size, style, name)
 
-        #设置背景
-        self.SetSizeHints( wx.DefaultSize, wx.Size( 650,370 ) )
-        self.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_INFOTEXT ) )
-        self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
+        self.Bind(wx.EVT_ERASE_BACKGROUND,self.on_eraze_background)
+        self.parent = parent
 
-        self.Bind(wx.EVT_BUTTON,self.refreshlist,id=self.pnl.m_b_refresh.GetId())
-        self.Bind(wx.EVT_BUTTON,self.on_enter_click,id=self.pnl.m_b_gotomain.GetId())
-
-        self.pnl.m_unuse_container = wx.FlexGridSizer( 0, 4, 0, 0 )
-        self.pnl.m_unuse_container.SetFlexibleDirection( wx.BOTH )
-        self.pnl.m_unuse_container.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        self.pnl.m_loader_unuse.SetSizer( self.pnl.m_unuse_container )
-
-        self.pnl.m_use_container = wx.FlexGridSizer( 0, 4, 0, 0 )
-        self.pnl.m_use_container.SetFlexibleDirection( wx.BOTH )
-        self.pnl.m_use_container.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        self.pnl.m_loader_use.SetSizer( self.pnl.m_use_container )
+        self.m_mod_title_icon.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["icon"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_title_help.SetBitmap(wx.Bitmap(config.assets["textures"]["help"],wx.BITMAP_TYPE_PNG))
+        self.buildin_icon.SetBitmap(wx.Bitmap(config.assets["textures"]["logo"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_gotomain.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["gotomain"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_refresh.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["refresh"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_config.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["config"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_folder.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["folder"],wx.BITMAP_TYPE_PNG))
 
     def __del__(self):
-        pass
-
-    def OnCLose(self,event):
-        self.Hide()
-        log.log("Close mod loader frame")
-        self.is_opened = False
+        return super().__del__()
 
     def refreshlist(self,event):
-        mod = wx.Button( self.pnl.m_loader_unuse, wx.ID_ANY, u'刷新', wx.DefaultPosition, wx.Size( 70,-1 ), wx.BU_AUTODRAW|0 )
-        
+        mod = wx.Button( self.pnl.m_loader_unuse, wx.ID_ANY, _(u'刷新'), wx.DefaultPosition, wx.Size( 70,-1 ), wx.BU_AUTODRAW|0 )
         self.pnl.m_unuse_container.Add(mod)
-        
         self.pnl.m_loader_unuse.Layout()
         self.pnl.Layout()
-        pass
+    
+    def on_loader_help( self, event ):
+        event.Skip()
 
-    def on_enter_click(self,event):
-        log.log("Enter main frame and hide mod loader")
+    def on_link_clicked( self, event ):
+        event.Skip()
+
+    # 进入主界面
+    def on_gotomain( self, event ):
+        event.Skip()
+        log.log(_("Enter main frame and hide mod loader"))
         self.Hide()
+        self.parent.Hide()
         m_splash_screen(starmain(None))
-        
 
+    def on_refresh( self, event ):
+        event.Skip()
+
+    def m_config( self, event ):
+        event.Skip()
+
+    def m_folder( self, event ):
+        event.Skip()
+
+    # 绘制背景图片
+    def on_eraze_background(self,event):
+        dc = event.GetDC()
+        if not dc:
+            dc = wx.ClientDC(self)
+            rect = self.GetUpdateRegion().GetBox()
+            dc.SetClippingRect(rect)
+            dc.Clear()
+        dc.DrawBitmap(wx.Bitmap(config.assets["textures"]["background"],wx.BITMAP_TYPE_BMP), 0, 0)    
+
+class starloaderframe(wx.Frame):
+
+    def __init__(self, *args, **kw):
+        wx.Frame.__init__(self,parent=None,title = _(u"模组加载"),pos = wx.DefaultPosition, size = wx.Size( 660,390 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
+
+        self.pnl = starloader(self)
+
+        self.SetIcon(wx.Icon(config.assets["textures"]["icon"]))
+
+        self.SetSizeHints( wx.DefaultSize, wx.Size( 660,390 ) )
+
+        self.Center()     

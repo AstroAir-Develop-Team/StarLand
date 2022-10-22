@@ -19,6 +19,9 @@ import wx
 
 import core.ui.images as imglib
 
+import gettext
+_ = gettext.gettext
+
 ###########################################################################
 ## Class m_main_panel
 ###########################################################################
@@ -51,13 +54,13 @@ class m_main_panel ( wx.Panel ):
 
 		self.m_main_container.AssignImageList(lb_icon)
 
-		self.m_main_container.AddPage( self.m_main_device, u"设备", True,imageId=0)
-		self.m_main_container.AddPage( self.m_main_weather, u"天气", False ,imageId=1)
-		self.m_main_container.AddPage( self.m_main_starparser, u"天体搜索", False ,imageId=2)
-		self.m_main_container.AddPage( self.m_main_starinfo, u"天体信息", False ,imageId=3)
-		self.m_main_container.AddPage( self.m_main_server, u"服务器", False ,imageId=4)
-		self.m_main_container.AddPage( self.m_main_mod, u"模组", False ,imageId=5)
-		self.m_main_container.AddPage( self.m_main_config, u"配置", False ,imageId=6)
+		self.m_main_container.AddPage( self.m_main_device, _(u"设备"), True,imageId=0)
+		self.m_main_container.AddPage( self.m_main_weather, _(u"天气"), False ,imageId=1)
+		self.m_main_container.AddPage( self.m_main_starparser, _(u"天体搜索"), False ,imageId=2)
+		self.m_main_container.AddPage( self.m_main_starinfo, _(u"天体信息"), False ,imageId=3)
+		self.m_main_container.AddPage( self.m_main_server, _(u"服务器"), False ,imageId=4)
+		self.m_main_container.AddPage( self.m_main_mod, _(u"模组"), False ,imageId=5)
+		self.m_main_container.AddPage( self.m_main_config, _(u"配置"), False ,imageId=6)
 
 		m_main_sizer.Add( self.m_main_container, 1, wx.EXPAND |wx.ALL, 5 )
 

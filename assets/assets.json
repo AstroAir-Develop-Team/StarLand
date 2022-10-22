@@ -4,9 +4,18 @@
         "icon" : "assets/textures/icon.ico",
         "background" : "assets/textures/background.bmp",
         "splash" : "assets/textures/splash.png",
+        "help" : "assets/textures/icon/m_icon_help.png",
+        "logo" : "assets/textures/icon/m_logo.png",
         "menu" : {
             "exit" : "assets/textures/icon/m_menu_exit.png",
             "about" : "assets/textures/icon/m_menu_ahout.png"
+        },
+        "loader" : {
+            "icon" : "assets/textures/icon/m_loader_icon.png",
+            "config" : "assets/textures/icon/m_loader_config.png",
+            "folder" : "assets/textures/icon/m_loader_folder.png",
+            "gotomain" : "assets/textures/icon/m_loader_gotomain.png",
+            "refresh" : "assets/textures/icon/m_loader_refresh.png"            
         }
     },
     "web" : {
