@@ -56,10 +56,10 @@
 				<img id="polaris_marker" src="assets/textures/icon/polaris.png" alt="polaris_marker"/>
 				<p id="legend">望远镜中的视野</p>
 			</div>
-			<h2>极轴</h2>
-			<table>
+			<h2>极轴</h2>  
+			<table summary="polar">
 				<tr>
-					<th></th>
+					<th id="none"></th>
 					<td class="polarishdr">时角</td>
 					<td class="polarisdata"><span id="pha"></span></td>
 				</tr>
@@ -89,8 +89,8 @@
 			<img src="assets/textures/icon/moon.png" alt="moon"/>
 			<h2>月球</h2>
 			<p><span id="moon_phase">&nbsp;</span></p>
-			<table>
-				<th></th>
+			<table summary="moon">
+				<th id="none"></th>
 				<tr>
 					<td class="moonhdr">升起</td>
 					<td class="moondata"><span id="moon_rise"></span></td>
@@ -136,8 +136,8 @@
 		<div id="sun">
 			<img src="assets/textures/icon/sun.png" alt="sun"/>
 			<h2>太阳</h2>
-			<table>
-				<th></th>
+			<table summary="sun">
+				<th id="none"></th>
 				<tr>
 					<td class="sunhdr">天文黄昏开始</td>
 					<td class="sundata"><span id="sun_at_start"></td>
@@ -198,7 +198,7 @@
 		</div>
 		<div id="planets">
 			<h2>太阳系</h2>
-			<table>
+			<table summary="solar_system">
 				<tr>
 					<td class="planetshdr">&nbsp;</td>
 					<td class="planetshdrdata">升起</td>
