@@ -92,12 +92,12 @@ class my_loader_panel ( wx.Panel ):
 
 		m_mod_content_container.Add( ( 110, 0), 1, wx.EXPAND, 5 )
 
-		self.m_mod_listbook = wx.Listbook( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 420,200 ), wx.LB_DEFAULT )
-		m_mod_listbookImageSize = wx.Size( 32,32 )
-		m_mod_listbookIndex = 0
-		m_mod_listbookImages = wx.ImageList( m_mod_listbookImageSize.GetWidth(), m_mod_listbookImageSize.GetHeight() )
-		self.m_mod_listbook.AssignImageList( m_mod_listbookImages )
-		self.mod_buildin = wx.Panel( self.m_mod_listbook, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TAB_TRAVERSAL )
+		self.m_mod_lb = wx.Listbook( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 420,200 ), wx.LB_DEFAULT )
+		m_mod_lb_is = wx.Size( 32,32 )
+		m_mod_lb_index = 0
+		m_mod_lb_images = wx.ImageList( m_mod_lb_is.GetWidth(), m_mod_lb_is.GetHeight() )
+		self.m_mod_lb.AssignImageList( m_mod_lb_images )
+		self.mod_buildin = wx.Panel( self.m_mod_lb, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TAB_TRAVERSAL )
 		mod_buildin_box = wx.BoxSizer( wx.VERTICAL )
 
 		buildin_content = wx.FlexGridSizer( 0, 1, 0, 0 )
@@ -189,9 +189,9 @@ class my_loader_panel ( wx.Panel ):
 		self.mod_buildin.SetSizer( mod_buildin_box )
 		self.mod_buildin.Layout()
 		mod_buildin_box.Fit( self.mod_buildin )
-		self.m_mod_listbook.AddPage( self.mod_buildin, wx.EmptyString, True )
+		self.m_mod_lb.AddPage( self.mod_buildin, wx.EmptyString, True )
 
-		m_mod_content_container.Add( self.m_mod_listbook, 1, wx.EXPAND |wx.ALL, 5 )
+		m_mod_content_container.Add( self.m_mod_lb, 1, wx.EXPAND |wx.ALL, 5 )
 
 
 		m_mod_content.Add( m_mod_content_container, 1, wx.EXPAND, 5 )
@@ -251,7 +251,6 @@ class my_loader_panel ( wx.Panel ):
 	def __del__( self ):
 		pass
 
-	# Virtual event handlers, override them in your derived class
 	def on_loader_help( self, event ):
 		event.Skip()
 

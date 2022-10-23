@@ -15,19 +15,42 @@ the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
 """
 
+from dataclasses import dataclass
 from flask import Flask,render_template
 from flask_wtf import CSRFProtect
 from flask_socketio import SocketIO
+
+from os import path
+from json import load
 
 import config
 
 from core.lib.starlog import starlog
 
+log = starlog(__name__)
+
+###########################################################################
+
+# 读取配置文件
+def _load_config_():
+    _path = config.config_data["config"]["server"]
+    if path.isfile(_path[0]):
+        with open(_path[0],mode="r",encoding="utf-8") as file:
+            data = load(file)
+        log.log(f"Loaded server config from file")
+        return data
+    else:
+        log.loge(f"Failed to load {_path[0]}")
+    return False
+config.mainconfig["server"] = _load_config_()
+
+###########################################################################
+
 # 初始化Flask服务器
-app = Flask(__name__,static_folder="../../assets/",template_folder="../../assets/templates/")
+app = Flask(__name__,static_folder=config.mainconfig["server"]["config"]["static"],template_folder=config.mainconfig["server"]["config"]["template"])
 app.config.update(
-    SECRET_KEY = "starland",
-    SESSION_COOKIE_NAME = "starland"
+    SECRET_KEY = config.mainconfig["server"]["config"]["key"],
+    SESSION_COOKIE_NAME = config.mainconfig["server"]["config"]["cookie_name"]
 )
 # Websocket服务
 socketio = SocketIO(app)
@@ -35,7 +58,16 @@ socketio = SocketIO(app)
 crfs = CSRFProtect()
 crfs.init_app(app)
 
-log = starlog(__name__)
+###########################################################################
+
+@dataclass
+class server_info():
+    def __init__(self) -> None:
+        self.astropanel = None
+        self.gpspanel = None
+info = server_info()
+
+###########################################################################
 
 # 主页
 @app.route("/")
@@ -67,17 +99,28 @@ def not_found(_):
 def server_error(_):
     return render_template(config.assets["web"]["500"])
 
+###########################################################################
+
+def astropanel_thread():
+    pass
+
+@socketio.on("/astropanel/connect")
+def handle_connect():
+    if info.astropanel is None:
+        info.astropanel = socketio.start_background_task(target=astropanel_thread)
+
+
 class starserver():
 
     def __init__(self):
-        log.log("Init server and load config")
         self.server = None
-
+ 
     def __del__(self):
         log.log("Server class deleted")
 
     # 运行服务器
     def runserver(self,host="127.0.0.1",port=8000):
         log.log(f"Start buildin server in {host} on {port}")
-        app.run(host=host,port=port,threaded=True)
+        socketio.run(app,host=host,port=port)
+
           

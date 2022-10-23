@@ -24,6 +24,7 @@ from core.ui.starinfoui import m_starinfo_panel
 from core.ui.serverui import m_server_panel
 from core.starweather import starweather
 from core.stardevice import stardevice
+from core.starsearch import starsearch
 
 from core.ui.taskbaricon import m_taskbar_icon
 from core.ui.aboutui import m_ahout_ui
@@ -47,7 +48,7 @@ class starmain(wx.Frame):
     def __init__(self,parent):
 
         log.log(_("Prepare main ui and load infomation"))
-        wx.Frame.__init__(self,parent,title = _(u"星空猎手"),pos = wx.DefaultPosition, size = wx.Size( 660,410 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
+        wx.Frame.__init__(self,parent,title = _(u"星空猎手"),pos = wx.DefaultPosition, size = wx.Size( 800,600 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
 
         self.pnl = m_main_panel(self)
 
@@ -55,13 +56,15 @@ class starmain(wx.Frame):
         self.SetIcon(wx.Icon(config.assets["textures"]["icon"]))
 
         #设置背景
-        self.SetSizeHints( wx.DefaultSize, wx.Size( 660,410 ) )
+        self.SetSizeHints( wx.DefaultSize, wx.Size( 800,600 ) )
         self.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_INFOTEXT ) )
         self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_WINDOW ) )
 
         self.pnl.m_main_starinfo = m_starinfo_panel(self.pnl.m_main_starinfo)
         
         self.pnl.m_main_weather = starweather(self.pnl.m_main_weather)
+
+        self.pnl.m_main_starparser = starsearch(self.pnl.m_main_starparser)
 
         self.pnl.m_main_server = m_server_panel(self.pnl.m_main_server)
         

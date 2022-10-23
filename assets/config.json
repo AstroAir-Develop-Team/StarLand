@@ -1,5 +1,10 @@
 {
     "config" : {
-        "qweather" : ["config/client/location.json","config/client/qweather.json","config/client/weather.json"]
+        "qweather" : ["config/client/location.json","config/client/qweather.json","config/client/weather.json"],
+        "virtualgps" : ["config/virtualgps/location.json","/tmp/vgps"],
+        "server" : ["config/server/config.json"]
+    },
+    "data" : {
+        "stardata" : ["data/stardata/Messier.json","data/stardata/NGCIC.json"]
     }
 }

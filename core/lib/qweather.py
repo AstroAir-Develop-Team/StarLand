@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+
 Copyright(c) 2022 Max Qian  <astroair.cn>
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
 License version 3 as published by the Free Software Foundation.
@@ -13,10 +15,10 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
+
 """
 
 from dataclasses import dataclass
-from genericpath import isfile
 from requests import get,exceptions
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -53,10 +55,6 @@ class Qweather():
         config.threadpool.submit(self.get_location())
         config.threadpool.submit(self.hitokoto())
         config.threadpool.submit(self.get_weather_qweater())
-        pass
-
-    def __del__(self):
-        pass
 
     # 检查互联网连接
     def checkconnection(self):
@@ -155,10 +153,14 @@ class Qweather():
                                     geourl = "https://geoapi.qweather.com/v2/city/lookup?location=" + info.name + "&key=" + info.key
                                     try:
                                         response = get(geourl).json()
-                                        if response['code'] != "200":
-                                            log.loge(f"Unable to get weather infomation , error code is {data['code']}")
-                                        else:
-                                            info.city_id = response["location"][0]["id"]
+                                        try:
+                                            if response['code'] != "200":
+                                                log.loge(f"Unable to get weather infomation , error code is {data['code']}")
+                                            else:
+                                                info.city_id = response["location"][0]["id"]
+                                        except KeyError:
+                                            log.loge("GG")
+                                            return
                                         log.log("Get location from https://geoapi.qweather.com/v2/city")
                                     except exceptions.ConnectionError:
                                         log.loge("Could not connect Qweather server,please check Internet connnection!")

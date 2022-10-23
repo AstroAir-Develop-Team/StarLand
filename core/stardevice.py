@@ -1,7 +1,9 @@
 # coding=utf-8
 
 """
+
 Copyright(c) 2022 Max Qian  <astroair.cn>
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
 License version 3 as published by the Free Software Foundation.
@@ -13,6 +15,7 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
+
 """
 
 import wx
@@ -20,17 +23,20 @@ import wx
 import gettext
 _ = gettext.gettext
 
+from core.lib.starcamera import starcamera
+
 import core.ui.images as imglib
 
 class stardevice(wx.Panel):
 
-    def __init__( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 620,310 ), style = wx.TAB_TRAVERSAL, name = wx.EmptyString ):
+    def __init__( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 780,600 ), style = wx.TAB_TRAVERSAL, name = wx.EmptyString ):
+        
         wx.Panel.__init__ ( self, parent, id = id, pos = pos, size = size, style = style, name = name )
         m_device_container = wx.BoxSizer( wx.VERTICAL )
 
         self.m_device_listbook = wx.Listbook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LB_DEFAULT )
 
-        self.m_camera = wx.Panel( self.m_device_listbook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_camera = starcamera( self.m_device_listbook)
 
         self.m_mount = wx.Panel( self.m_device_listbook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
               
