@@ -4,13 +4,13 @@
     "countryCode": "CN",
     "region": "ZJ",
     "regionName": "浙江省",
-    "city": "澧浦镇",
+    "city": "杭州",
     "zip": "",
-    "lat": 29.1416,
-    "lon": 119.789,
+    "lat": 30.2994,
+    "lon": 120.1612,
     "timezone": "Asia/Shanghai",
-    "isp": "Chinanet",
-    "org": "Chinanet ZJ",
-    "as": "AS4134 CHINANET-BACKBONE",
-    "query": "36.23.68.203"
+    "isp": "Huashu media&Network Limited",
+    "org": "Huashu media&Network Limited",
+    "as": "AS24139 Huashu media&Network Limited",
+    "query": "218.108.23.210"
 }

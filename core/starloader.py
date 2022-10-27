@@ -44,10 +44,22 @@ class starloader(my_loader_panel):
         self.m_mod_title_icon.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["icon"],wx.BITMAP_TYPE_PNG))
         self.m_mod_title_help.SetBitmap(wx.Bitmap(config.assets["textures"]["help"],wx.BITMAP_TYPE_PNG))
         self.buildin_icon.SetBitmap(wx.Bitmap(config.assets["textures"]["logo"],wx.BITMAP_TYPE_PNG))
+
         self.m_mod_gotomain.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["gotomain"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_gotomain.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNTEXT ) )
+        self.m_mod_gotomain.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_INACTIVECAPTION ) )
+
         self.m_mod_refresh.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["refresh"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_refresh.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNTEXT ) )
+        self.m_mod_refresh.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_INACTIVECAPTION ) )
+
         self.m_mod_config.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["config"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_config.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNTEXT ) )
+        self.m_mod_config.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_INACTIVECAPTION ) )
+
         self.m_mod_folder.SetBitmap(wx.Bitmap(config.assets["textures"]["loader"]["folder"],wx.BITMAP_TYPE_PNG))
+        self.m_mod_folder.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNTEXT ) )
+        self.m_mod_folder.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_INACTIVECAPTION ) )
 
     def __del__(self):
         return super().__del__()

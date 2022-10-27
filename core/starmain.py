@@ -82,7 +82,7 @@ class starmain(wx.Frame):
         # 创建菜单
         self.m_menubar = wx.MenuBar( 0 )
         self.m_menu_file = wx.Menu()
-        self.m_menuItem_exit = wx.MenuItem( self.m_menu_file, wx.ID_ANY, _(u"退出")+ u"\t" + u"ALT + F4", wx.EmptyString, wx.ITEM_NORMAL )
+        self.m_menuItem_exit = wx.MenuItem( self.m_menu_file, wx.ID_ANY, _(u"退出")+ u"\t" + u"ALT + F4", _(u"结束你的星空之旅"), wx.ITEM_NORMAL )
         self.m_menuItem_exit.SetBitmap(wx.Bitmap(config.assets["textures"]["menu"]["exit"],wx.BITMAP_TYPE_PNG))
         self.m_menu_file.Append( self.m_menuItem_exit )
         self.m_menubar.Append( self.m_menu_file, _(u"文件") )

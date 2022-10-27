@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
+
 Copyright(c) 2022 Max Qian  <astroair.cn>
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
 License version 3 as published by the Free Software Foundation.
@@ -13,6 +15,7 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
+
 """
 
 import wx
@@ -30,6 +33,7 @@ class m_server_panel ( wx.Panel ):
 
 		self.m_notebook5 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_server_native = wx.Panel( self.m_notebook5, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		
 		m_server_native_container = wx.FlexGridSizer( 0, 3, 0, 0 )
 		m_server_native_container.SetFlexibleDirection( wx.BOTH )
 		m_server_native_container.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
