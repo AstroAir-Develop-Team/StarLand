@@ -34,6 +34,7 @@ class lualoader(threading.Thread):
         self.params = params
         self.target = target
         self.file = files
+        self.results = None
 
     def __delattr__(self, __name: str) -> None:
         return super().__delattr__(__name)
@@ -46,11 +47,10 @@ class lualoader(threading.Thread):
             # 执行具体的函数,返回结果打印在屏幕上
             luaRuntime = self.getLuaRuntime()
             rel = luaRuntime(self.api, self.params)
-            print (rel)
+            self.results = rel
         except Exception as e:
-            log.loge(f"Run {self.file} error , {e.message}")
-            traceback.extract_stack()
- 
+            log.loge(f"Run {self.file} error , {e}")
+            traceback.extract_stack() 
  
     def getLuaRuntime(self):
         """
@@ -66,7 +66,7 @@ class lualoader(threading.Thread):
                     try:
                         content = fileHandler.read()
                     except Exception as e:
-                        log.loge(f"Run {self.file} error , {e.message}")
+                        log.loge(f"Run {self.file} error , {e}")
                         traceback.extract_stack()
     
                     # 创建lua执行环境

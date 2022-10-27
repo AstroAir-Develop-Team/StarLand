@@ -25,6 +25,7 @@ from os import path
 import config
 
 from core.lib.starlog import starlog
+from core.lib.lualoader import lualoader
 
 log = starlog(__name__)
 
@@ -50,10 +51,6 @@ class search():
 
     def __del__(self):
         pass
-
-    def search(self,target = None,ra = None,dec = None,stardata = "All") -> str:
-
-        pass
     
     # 检查数据库是否存在
     def _check_(self) -> dict:
@@ -78,4 +75,13 @@ class search():
             log.loge("KeyError when checked starbase")
         return flag
 
-            
+    def search(self,params) -> str:
+        """
+        搜索功能，支持输入名称，编号，赤经赤纬(J2000)
+        """
+        loader = lualoader(files="core/lua/main.lua",target="search",params=params)
+        loader.setDaemon(True)
+        loader.start()
+        loader.join()
+        results = loader.results
+        print(results)
