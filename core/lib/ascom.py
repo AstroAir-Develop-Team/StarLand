@@ -27,26 +27,36 @@ from core.lib.pyascom.dome import Dome
 import core.lib.socket
 
 class star_camera(Camera):
-
+    """
+    Camera driver for StarHunter base on ASCOM
+    """
     def __init__(self, address: str, device_number: int, protocol: str = "http"):
         super().__init__(address, device_number, protocol)
 
 class star_telescope(Telescope):
-
+    """
+    Telescope driver for StarHunter base on ASCOM
+    """
     def __init__(self, address: str, device_number: int, protocol: str = "http"):
         super().__init__(address, device_number, protocol)
 
 class star_focuser(Focuser):
-
+    """
+    Focuser driver for StarHunter base on ASCOM
+    """
     def __init__(self, address: str, device_number: int, protocol: str = "http"):
         super().__init__(address, device_number, protocol)
 
 class star_filterwheel(FilterWheel):
-
+    """
+    Filterwheel driver for StarHunter base on ASCOM
+    """
     def __init__(self, address: str, device_number: int, protocol: str = "http"):
         super().__init__(address, device_number, protocol)
 
 class star_dome(Dome):
-
+    """
+    Dome driver for StarHunter base on ASCOM
+    """
     def __init__(self, address: str, device_number: int, protocol: str = "http"):
         super().__init__(address, device_number, protocol)

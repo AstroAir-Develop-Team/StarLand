@@ -39,22 +39,39 @@ logger.setLevel(logging.INFO)
 init(autoreset=True)
 
 class starlog():
+    """
+    Logger for StarHunter\n
+    Support colorful log using colarama\n
+    Four mode : info | debug | warning | error
+    """
 
     def __init__(self,name) -> (str):
         self.uname = name
         
     #日志
     def log(self,msg) -> (str):
+        """
+        Normal message
+        """
         logger.info(f"[{self.uname}] - {msg}")
 
     # 错误日志
     def loge(self,msg) -> (str):
+        """
+        Error message 
+        """
         logger.info(f"[{self.uname}] - " + Fore.RED + f"{msg}" + Fore.RESET)
 
     # 警告日志
     def logw(self,msg) -> (str):
+        """
+        Warning message
+        """
         logger.info(f"[{self.uname}] - " + Fore.YELLOW + f"{msg}" + Fore.RESET)
 
     # 调试日志
     def logd(self,msg) -> (str):
+        """
+        Debug message
+        """
         logger.info(f"[{self.uname}] - " + Fore.MAGENTA + f"{msg}" + Fore.RESET)
