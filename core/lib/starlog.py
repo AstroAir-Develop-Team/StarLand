@@ -42,10 +42,7 @@ class starlog():
 
     def __init__(self,name) -> (str):
         self.uname = name
-
-    def __del__(self):
-        pass
-
+        
     #日志
     def log(self,msg) -> (str):
         logger.info(f"[{self.uname}] - {msg}")
