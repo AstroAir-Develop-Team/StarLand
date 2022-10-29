@@ -21,11 +21,13 @@ Boston, MA 02110-1301, USA.
 import wx
 
 from core.ui.cameraui import m_camera
+from core.lib.zwoasi import zwoasi
 
 class starcamera(m_camera):
 
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size( 710,600 ), style=wx.TAB_TRAVERSAL, name=wx.EmptyString):
         super().__init__(parent, id, pos, size, style, name)
+        self.asi = zwoasi()
     
     def __del__(self):
         return super().__del__()

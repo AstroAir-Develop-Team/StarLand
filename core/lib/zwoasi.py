@@ -19,7 +19,6 @@ Boston, MA 02110-1301, USA.
 """
 
 import ctypes
-from dataclasses import dataclass
 import os
 import sys
 
@@ -504,6 +503,8 @@ class zwoasi():
         if not self.zwoinfo._connected:
             log.loge("Camera not connected,please do not start exposure")
             return self.return_message("error","no camera connected","run after connected")
+        if params["is_save"]:
+            self.save_image()
         
     def abort_exposure(self) -> dict:
         """Abort camera exposure"""
@@ -527,3 +528,25 @@ class zwoasi():
             "offset" : int # offset
         }
         """
+
+    def save_image(self,buffer : bytearray,filename : str,tpye = "fit") -> dict:
+        """
+        Save image
+        @ buffer : image data
+        @ filename : do not add ".fit" or ".tiff"
+        """
+        path = os.path.join(os.getcwd(),"imgs")
+        if not os.path.exists(path=path):
+            os.mkdir(path)
+        imgpath = os.path.join(path,filename + "." + tpye)
+        if os.path.isfile(imgpath):
+            log.logw(f"{imgpath} had already existed")
+            return self.return_message("warning","image had already existed","delete old image")
+        
+        roi_width = ctypes.c_int()
+        roi_height = ctypes.c_int()
+        bins = ctypes.c_int()
+        image_type = ctypes.c_int()
+        r = self.zwolib.ASIGetROIFormat(self.zwoinfo._id, roi_width, roi_height, bins, image_type)
+        if r:
+            raise zwo_errors[r]
