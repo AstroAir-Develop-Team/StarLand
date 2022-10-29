@@ -6,6 +6,7 @@ __pycache__/
 logs/
 test/
 *.tle
+test.py
 
 # C extensions
 *.so
