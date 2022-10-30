@@ -21,6 +21,9 @@ Boston, MA 02110-1301, USA.
 import ctypes
 import os
 import sys
+import time
+import numpy
+from PIL import Image
 
 from core.lib.exceptions import ZWO_IOError
 from core.lib.starlog import starlog
@@ -237,6 +240,13 @@ class _EXPOSURE_INFO():
     _offset = 20
     _is_save = True
     _filename : str
+
+    _roi_ok = False
+    _roi_need_refresh = False
+    _roi_width : int
+    _roi_height : int
+    _bins : int
+    _image_type : int
 
 class zwoasi():
     """ASI Camera class"""
@@ -495,16 +505,52 @@ class zwoasi():
             "bin" : int # pixel merge
             "gain" : int # gain
             "offset" : int # offset
+            "imgtype" : str # jpg or tiff of fit(fits)
+
+            "initial_sleep" : float # wait to init
+            "poll" : float # sleep time while check
 
             "is_save" : bool # whether to save the image
+            "is_dark" : bool # dark image
             "filename" : str # filename to save
         }
         """
+        # 若相机未连接则返回错误
         if not self.zwoinfo._connected:
             log.loge("Camera not connected,please do not start exposure")
             return self.return_message("error","no camera connected","run after connected")
-        if params["is_save"]:
-            self.save_image()
+        # 若曝光时间异常则抛出警告
+        if params.get("exp") <= 0:
+            log.logw("Unrealistic exposure time, change to default exposure time")
+        # 若设置参数错误则返回错误
+        if self.set_camera_config(params=params).get("status") != "success":
+            log.loge("Unable to set camera parameters")
+            return self.return_message("error","unable to set parameters","try again")
+        # 开始曝光
+        r = self.zwolib.ASIStartExposure(self.zwoinfo._id,params.get("is_dark"))
+        if r:
+            log.loge("Unable to start exposure")
+            return self.return_message("error","unable to start exposure",f"{zwo_errors[r]}")
+        # 等待相机初始化做的预留时间
+        if params.get("initial_sleep"):
+            time.sleep(params.get("initial_sleep"))
+        else:
+            time.sleep(0.01)
+        # 等待进度
+        while self.get_exposure_status() == ASI_EXP_WORKING:
+            if params.get("poll"):
+                time.sleep(params.get("poll"))
+            else:
+                time.sleep(0.1)
+        # 曝光结束后的状态检查
+        if self.get_exposure_status() != ASI_EXP_SUCCESS:
+            log.loge("Unable to get image")
+            return self.return_message("error","unable to get image","unknown")
+        # 保存图像
+        if params.get("is_save"):
+            self.save_image(filename=params.get("filename"),tpye=params.get("imgtype"))
+        log.log("End of exposure")
+        return self.return_message("success","end of exposure")
         
     def abort_exposure(self) -> dict:
         """Abort camera exposure"""
@@ -529,24 +575,90 @@ class zwoasi():
         }
         """
 
-    def save_image(self,buffer : bytearray,filename : str,tpye = "fit") -> dict:
+    def save_image(self,filename : str,tpye = "jpg") -> dict:
         """
         Save image
-        @ buffer : image data
         @ filename : do not add ".fit" or ".tiff"
+        @ type : "fit" or "tiff" or "jpg"
+        TODO: Astropy or opencv or tifffile ?
         """
+        # 检查存放照片的文件夹是否存在
+        if filename is None:
+            log.loge("You have an image name. What do you want to save!")
+            return self.return_message("error","no filename","create one")
+        # 检查图像将要存放的文件夹是否存在
         path = os.path.join(os.getcwd(),"imgs")
         if not os.path.exists(path=path):
             os.mkdir(path)
         imgpath = os.path.join(path,filename + "." + tpye)
+        # 检查图像是否存在
         if os.path.isfile(imgpath):
             log.logw(f"{imgpath} had already existed")
             return self.return_message("warning","image had already existed","delete old image")
         
-        roi_width = ctypes.c_int()
-        roi_height = ctypes.c_int()
-        bins = ctypes.c_int()
-        image_type = ctypes.c_int()
-        r = self.zwolib.ASIGetROIFormat(self.zwoinfo._id, roi_width, roi_height, bins, image_type)
+        buffer = None
+        if not self.exposureinfo._roi_ok or self.exposureinfo._roi_need_refresh:
+            # 获取图像各项参数
+            roi_width = ctypes.c_int()
+            roi_height = ctypes.c_int()
+            bins = ctypes.c_int()
+            image_type = ctypes.c_int()
+            r = self.zwolib.ASIGetROIFormat(self.zwoinfo._id, roi_width, roi_height, bins, image_type)
+            if r:
+                log.loge("Unable to get image parameters")
+                return self.return_message("error","unable to get image parameters","zhiyin")
+            self.exposureinfo._roi_width = roi_width.value
+            self.exposureinfo._roi_height = roi_height.value
+            self.exposureinfo._bins = bins.value
+            self.exposureinfo._image_type = image_type.value
+            self.exposureinfo._roi_ok = True
+            self.exposureinfo._roi_need_refresh = False
+        # 计算图像大小
+        imgsize = self.exposureinfo._roi_height * self.exposureinfo._roi_width
+        # 24位图像
+        if self.exposureinfo._image_type == ASI_IMG_RGB24:
+            imgsize *= 3
+        # 16位图像
+        elif self.exposureinfo._image_type == ASI_IMG_RAW16:
+            imgsize *= 2
+        buffer = bytearray(imgsize)
+        # 获取图像数据
+        cbuf = (ctypes.c_char * len(buffer)).from_buffer(buffer)
+        r = self.zwolib.ASIGetDataAfterExp(self.zwoinfo._id, cbuf, imgsize)
         if r:
-            raise zwo_errors[r]
+            log.loge("Unable to get image data")
+            return self.return_message("error","Unable to get image data","zhiyin")
+        # 处理图像 - 基于numpy
+        img = None
+        shape = [self.exposureinfo._roi_height,self.exposureinfo._roi_width]
+        if self.exposureinfo._image_type == ASI_IMG_RAW8 or self.exposureinfo._image_type == ASI_IMG_Y8:
+            img = numpy.frombuffer(buffer=buffer, dtype=numpy.uint8)
+        elif self.exposureinfo._image_type == ASI_IMG_RAW16:
+            img = numpy.frombuffer(buffer=buffer, dtype=numpy.uint16)
+        elif self.exposureinfo._image_type == ASI_IMG_RGB24:
+            img = numpy.frombuffer(buffer=buffer, dtype=numpy.uint8)
+            shape.append(3)
+        else:
+            log.logw("Unsupported image type")
+        img = img.reshape(shape)
+        # 保存JPG图像
+        if tpye == "jpg":
+            mode = None
+            if len(img.shape) == 3:
+                img = img[:, :, ::-1]  # Convert BGR to RGB
+            if self.exposureinfo._image_type == ASI_IMG_RAW16:
+                mode = 'I;16'
+            image = Image.fromarray(img, mode=mode)
+            image.save(imgpath)
+            log.log(f"Save image to {imgpath}")
+        # 保存FIT图像
+        elif tpye == "fit" or tpye == "fits":
+            pass
+        # 保存TIFF图像
+        elif tpye == "tiff":
+            pass
+        # 保存个锤子
+        else:
+            log.loge("Unsupported image type")
+            return self.return_message("error","Unsupported image type")
+        
