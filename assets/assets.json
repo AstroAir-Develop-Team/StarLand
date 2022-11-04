@@ -16,6 +16,20 @@
             "folder" : "assets/textures/icon/m_loader_folder.png",
             "gotomain" : "assets/textures/icon/m_loader_gotomain.png",
             "refresh" : "assets/textures/icon/m_loader_refresh.png"            
+        },
+        "device" : {
+            "telescope" : {
+                "m_d_ts_n" : "assets/textures/icon/m_device_telescope_n.png",
+                "m_d_ts_s" : "assets/textures/icon/m_device_telescope_s.png",
+                "m_d_ts_e" : "assets/textures/icon/m_device_telescope_e.png",
+                "m_d_ts_w" : "assets/textures/icon/m_device_telescope_w.png",
+                "m_d_ts_en" : "assets/textures/icon/m_device_telescope_en.png",
+                "m_d_ts_es" : "assets/textures/icon/m_device_telescope_es.png",
+                "m_d_ts_wn" : "assets/textures/icon/m_device_telescope_wn.png",
+                "m_d_ts_ws" : "assets/textures/icon/m_device_telescope_ws.png",
+                "m_d_ts_stop" : "assets/textures/icon/m_device_telescope_stop.png",
+                "m_d_ts_goto" : "assets/textures/icon/m_device_telescope_goto.png"
+            }
         }
     },
     "web" : {

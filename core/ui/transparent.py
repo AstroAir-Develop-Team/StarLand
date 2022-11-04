@@ -24,8 +24,7 @@ class TransparentStaticText(wx.StaticText):
     """
     重写StaticText控件
     """
-    def __init__(self, parent, id=wx.ID_ANY, label='', pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.TRANSPARENT_WINDOW, name='TransparentStaticText'):
+    def __init__(self, parent, id=wx.ID_ANY, label='', pos=wx.DefaultPosition, size=wx.DefaultSize,style=wx.TRANSPARENT_WINDOW, name='TransparentStaticText'):
         wx.StaticText.__init__(self, parent, id, label, pos, size, style, name)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, lambda event: None)

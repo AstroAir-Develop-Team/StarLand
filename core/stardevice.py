@@ -18,14 +18,15 @@ Boston, MA 02110-1301, USA.
 
 """
 
+import gettext
+
 import wx
 
-import gettext
 _ = gettext.gettext
 
-from core.lib.starcamera import starcamera
-
 import core.ui.images as imglib
+from core.lib.starcamera import starcamera
+from core.lib.startelescope import startelescope
 
 class stardevice(wx.Panel):
 
@@ -36,9 +37,9 @@ class stardevice(wx.Panel):
 
         self.m_device_listbook = wx.Listbook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LB_DEFAULT )
 
-        self.m_camera = starcamera( self.m_device_listbook)
+        self.m_camera = starcamera( self.m_device_listbook )
 
-        self.m_mount = wx.Panel( self.m_device_listbook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_telescope = startelescope( self.m_device_listbook )
               
         self.m_guider = wx.Panel( self.m_device_listbook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
               
@@ -57,7 +58,7 @@ class stardevice(wx.Panel):
         self.m_device_listbook.AssignImageList(lb_icon)
 
         self.m_device_listbook.AddPage( self.m_camera, _(u"相机"), True ,imageId=0)
-        self.m_device_listbook.AddPage( self.m_mount, _(u"赤道仪"), False ,imageId=1)
+        self.m_device_listbook.AddPage( self.m_telescope, _(u"赤道仪"), False ,imageId=1)
         self.m_device_listbook.AddPage( self.m_guider, _(u"导星"), False ,imageId=2)
         self.m_device_listbook.AddPage( self.m_focuser, _(u"电调"), False ,imageId=3)
         self.m_device_listbook.AddPage( self.m_align, _(u"校准"), False ,imageId=4)
