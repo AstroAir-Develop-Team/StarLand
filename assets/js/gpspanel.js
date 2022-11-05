@@ -31,7 +31,7 @@ function LoadMap() {
             anchor: [0.5, 1.0],
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
-            src: 'assets/img/marker.png'
+            src: '../textures/icon/gpspanel/marker.png'
         })
     });
 

@@ -19,7 +19,8 @@ Boston, MA 02110-1301, USA.
 """
 
 import wx
-import os,json,sys,importlib,signal
+import os,sys,importlib
+from json import load , JSONDecodeError
 
 import core.lib.i18n
 
@@ -32,43 +33,35 @@ _ = gettext.gettext
 
 log = starlog(__name__)
 
-# 加载文件
-def _load_(path,filename) -> (str):
+def _load_(path : str,filename : str) -> dict:
+    """Load Config File when preloading"""
     if os.path.isfile(os.path.join(path,filename)):
         try:
             with open(os.path.join(path,filename),mode="r",encoding="utf-8") as file:
-                data = json.load(file)
+                data = load(file)
                 log.log(_(f"Loaded {filename} in {path}"))
                 return data
         except IOError:
             log.loge(_(f"IOError when load {filename}"))
+        except JSONDecodeError as error:
+            log.loge(_(f"{filename} is not a json file , error code : {error.msg}"))
     else:
         log.loge(_(f"Could not find {filename} in {path}"))
 
-# 检查目录下文件是否完整
-# 此处未写完，仅限占位
-def _check_(dic={}):
-    for i in dic.values():
-        if os.path.isfile(i):
-            log.log(f"Find {i}")
+def _check_(dic : dict) -> dict:
+    """Check if the file is correct - Not Finish"""
+    for item in dic.values():
+        if os.path.isfile(item):
+            log.log(f"Find {item}")
 
-# 停止运行
-def shutdown():
-    log.log(_("Shutdown by user,good bye!"))
-    exit(0)
-
-# 终端句柄
-def term_handler(signum, frame):
-	raise KeyboardInterrupt
-# 事件绑定 - 有问题，没有效果
-signal.signal(signal.SIGTERM, term_handler)
-
-# 主函数
-def main():
+def main() -> None:
+    """Main Function"""
     # 加载配置
     config.assets = _load_("assets","assets.json")
-    config.config_data = _load_("assets","config.json")
-    if len(config.assets) != 0 and len(config.config_data) != 0:
+    config.config_data = _load_("data","data.json")
+    config.mainconfig = _load_("assets","mainconfig.json")
+    # 检查配置是否加载成功
+    if config.assets is not None and config.config_data is not None and config.mainconfig is not None:
         # 输出一些基本信息
         log.log(_("Loading starland ui and server , please wait for a moment"))
         log.log(_(f"System info : {sys.version}"))
@@ -86,12 +79,9 @@ def main():
         app.MainLoop()
     else:
         log.loge(_("Config data is empty,something is going wrong!"))
-        raise IOError("Please check your config file!")
+        raise IOError(_("Please check your config file!"))
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        shutdown()
+    main()
 else:
     log.loge(_("Please run in main thread"))

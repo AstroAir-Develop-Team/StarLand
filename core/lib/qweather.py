@@ -29,10 +29,14 @@ from core.lib.starlog import starlog
 
 import config
 
+import gettext
+_ = gettext.gettext
+
 log = starlog(__name__)
 
 @dataclass
 class QweatherInfo():
+    """Weather Info"""
     def __init__(self) -> None:
         self.key = ""           # 密钥
         self.license = ""       # 证书
@@ -48,195 +52,159 @@ class QweatherInfo():
         }          # 天气数据
         
 class Qweather():
-
+    """All Weather Function"""
     def __init__(self) -> None:
-        self.is_internet_connected = config.threadpool.submit(self.checkconnection())
-        
-        config.threadpool.submit(self.get_location())
-        config.threadpool.submit(self.hitokoto())
-        config.threadpool.submit(self.get_weather_qweater())
+        """Init"""
+        threadpool = ThreadPoolExecutor(max_workers=5)
+        self.is_internet_connected = self.checkconnection()
+        threadpool.submit(self.get_location)
+        threadpool.submit(self.hitokoto)
+        threadpool.submit(self.get_weather_qweather)
 
     # 检查互联网连接
-    def checkconnection(self):
-        log.log("Starting checking internet connection")
+    def checkconnection(self) -> bool:
+        """Check Internet Connection based on wheather www.baidu.com is accessible"""
+        log.log(_("Starting checking internet connection"))
         try:
             get("https://www.baidu.com")
             return True
         except exceptions.ConnectionError:
-            log.loge("Could not connect www.baidu.com , please check your internet connection")
-        except exceptions.HTTPError:
-            log.loge("Http Error when checked connection")
+            log.loge(_("Could not connect www.baidu.com , please check your internet connection"))
         except exceptions.ConnectTimeout:
-            log.loge("Timeout")
-        except:
-            log.loge("Unknown error during checking connection")
+            log.loge(_("Timeout"))
+        finally:
+            log.log(_("Finish Internet checking"))
         return False
 
     # 获取定位
-    def get_location(self):
-        if self.is_internet_connected:
-            # 如果没有文件夹就自己建一个
-            if not os.path.exists("config/client"):
-                os.mkdir("config/client")
-            """
-            此处是否有能代替以下两个网址的，以提高访问速度
-            """
-            try:
-                # 获取基于互联网定位的本机IP
-                ip = json.loads(get("https://httpbin.org/ip").text)["origin"]
-                log.log(f"Local Ip is {ip}")
-                # 再通过IP解析网站获取较为准确的位置
-                data = json.loads(get(f"http://ip-api.com/json/{ip}?lang=zh-CN").text)
-                # 将获取的坐标写入问价，以便后续读取
-                with open(config.config_data["config"]["qweather"][0],"w+",encoding="utf-8") as file:
-                    # 将数据格式化输出，默认4个空格
-                    file.write(json.dumps(data,indent=4,ensure_ascii=False))
-                return data["country"] + data["regionName"] + data["city"]    
-            # 连接错误
-            except exceptions.ConnectionError:
-                log.loge("Could not connect Location server,please check Internet connnection!")
-        else:
-            log.loge("No internet connected,Could not use locate function")
+    def get_location(self) -> dict:
+        """Get location via internet"""
+        if not self.is_internet_connected:
+            log.loge(_("No internet connected,Could not use locate function"))
+            return self.return_message("error",_("no internet connected",_("check")))
+        try:
+            # 获取基于互联网定位的本机IP
+            ip = json.loads(get("https://httpbin.org/ip").text).get("origin")
+            log.log(_(f"Local Ip is {ip}"))
+            # 再通过IP解析网站获取较为准确的位置
+            response = json.loads(get(f"http://ip-api.com/json/{ip}?lang=zh-CN").text)
+            config.mainconfig["weather"]["location"] = response
+            r_msg = response.get("country") + response.get("regionName") + response.get("city")    
+            return self.return_message("success",r_msg)
+        # 连接错误
+        except exceptions.ConnectionError:
+            log.loge(_("Could not connect Location server,please check Internet connnection!"))
+            return self.return_message("error","connection error","unknown")            
     
     # 每日一言，有一部分是傻波语录
-    def hitokoto(self):
-        if self.is_internet_connected:
-            try:
-                # 获取每日一言
-                response = get("https://v1.hitokoto.cn/").json()
-                speaker = response['from_who']
-                text = response['hitokoto']
-                # 如果没有明确的作者
-                if not speaker:
-                    speaker = "noname"
-                log.log(f'A single sentence every day : {text}  --{speaker}')
-                return f'{text} -- {speaker}'
-            except exceptions.ConnectionError:
-                log.loge("Could not connect Hitokoto server,please check Internet connnection!")
-            except exceptions.ProxyError:
-                log.loge("Proxy error when got hitotoko")
-        else:
-            log.loge("No internet connected,Could not use hitokoto function")
+    def hitokoto(self) -> dict:
+        if not self.is_internet_connected:
+            log.loge(_("No internet connected,Could not use hitokoto function"))
+            return self.return_message("error",_("no internet connected",_("check")))
+        try:
+            # 获取每日一言
+            response = get(config.mainconfig.get("weather").get("hitokoto").get("url")).json()
+            if response.get("from_who") is None:
+                config.mainconfig["weahter"]["hitokoto"]["data"]["from"] = _("noname")
+            config.mainconfig["weahter"]["hitokoto"]["data"]["word"] = response.get('hitokoto')
+            return self.return_message("success")
+        except exceptions.ConnectionError:
+            log.loge(_("Could not connect Hitokoto server,please check Internet connnection!"))
+            return self.return_message("error",_("connection error"),_("unknown"))  
 
     # 获取天气数据 - 来自和风天气
-    def get_weather_qweater(self):
+    def get_weather_qweather(self):
         # 如果互联网未连接则不会执行任何操作
-        if self.is_internet_connected:
-            info = QweatherInfo()
-            # 如果还未获取天气数据
-            if len(info.data["content"]) == 0:
-                path = [config.config_data["config"]["qweather"][0],config.config_data["config"]["qweather"][1],config.config_data["config"]["qweather"][2]]
-                if os.path.isfile(path[1]):
-                    try:
-                        # 读取所需的配置信息 - 密钥 + 证书
-                        with open(path[1],mode="r",encoding="utf-8") as file:
-                            data = json.load(file)
-                            info.key = data.get("key")
-                            info.license = data.get("license")
-                        log.log(f"Loaded {path[1]}")
-                        # 判断密钥和证书是否为空
-                        if len(info.key) != 0 and len(info.license) != 0:
-                            # 如果还没有获取位置信息则定位
-                            if len(info.city_id) == 0:
-                                log.logw("Location is unknown , try to get from internet")
-                                # 检查文件是否存在
-                                if os.path.isfile(path[0]):
-                                    # 读取位置信息
-                                    with open(path[0],mode="r",encoding="utf-8") as file:
-                                        try:
-                                            data = json.load(file)
-                                            info.name = data["city"]
-                                            info.full_name = data["country"] + data["regionName"] + data["city"]
-                                        except KeyError:
-                                            log.loge("Could not read inneed infomation for getting location")
-                                    # 和风天气API - 地理位置
-                                    geourl = "https://geoapi.qweather.com/v2/city/lookup?location=" + info.name + "&key=" + info.key
-                                    try:
-                                        response = get(geourl).json()
-                                        try:
-                                            if response['code'] != "200":
-                                                log.loge(f"Unable to get weather infomation , error code is {data['code']}")
-                                            else:
-                                                info.city_id = response["location"][0]["id"]
-                                        except KeyError:
-                                            log.loge("GG")
-                                            return
-                                        log.log("Get location from https://geoapi.qweather.com/v2/city")
-                                    except exceptions.ConnectionError:
-                                        log.loge("Could not connect Qweather server,please check Internet connnection!")
-                                else:
-                                    log.loge(f"Could not find {path[0]}")
-                        # 和风天气所有天气API
-                        url_list = []
-                        if info.license == "dev":
-                            url_list = [
-                                f'https://devapi.qweather.com/v7/weather/now?key={info.key}&location={info.city_id}',
-                                f'https://devapi.qweather.com/v7/astronomy/sun?key={info.key}&location={info.city_id}&date={info.time}',
-                                f'https://devapi.qweather.com/v7/astronomy/moon?key={info.key}&location={info.city_id}&date={info.time}',
-                                f'https://devapi.qweather.com/v7/warning/now?key={info.key}&location={info.city_id}',
-                                f'https://devapi.qweather.com/v7/weather/7d?key={info.key}&location={info.city_id}'
-                            ]
-                            log.log("Chose developer key & license")
-                        elif info.license == "business":
-                            url_list = [
-                                f'https://api.qweather.com/v7/weather/now?key={info.key}&location={info.city_id}',
-                                f'https://api.qweather.com/v7/astronomy/sun?key={info.key}&location={info.city_id}&date={info.time}',
-                                f'https://api.qweather.com/v7/astronomy/moon?key={info.key}&location={info.city_id}&date={info.time}',
-                                f'https://api.qweather.com/v7/warning/now?key={info.key}&location={info.city_id}',
-                                f'https://api.qweather.com/v7/weather/7d?key={info.key}&location={info.city_id}',
-                                f"https://api.qweather.com/v7/astronomy/solar-elevation-angle?key={info.key}&location={info.city_id}&date={info.time}&tz={info.timezone}&alt={info.alt}"
-                            ]
-                            log.log("Chose business key & license")
-                        else:
-                            log.logw("Unknown license,choose default key & license")
-                        # 多线程
-                        weather_thread = ThreadPoolExecutor(max_workers=5)
-                        results = weather_thread.map(self._load_from_internet_,url_list)
-                        # 读取返回的结果
-                        result_name = ["now","sun","moon","warning","7d"]
-                        for item,result_type in zip(results,result_name):
-                            info.data["content"][result_type] = item
-                        info.data["status"] = "successful"
-                        # 保存数据
-                        with open(path[2],mode="w+",encoding="utf-8") as file:
-                            json.dump(info.data,file,indent=4,ensure_ascii=False)
-
-                        return info.data
-                    except IOError:
-                        log.loge("IOError when load Qweather")
-                        return {"status":"error"}
-                else:
-                    log.loge(f"Could not find {config.config_data['config']['qweather'][1]}")
-                    return {"status":"error"}
-            else:
-                log.logw("Had already got weather info,please do not load it again!")
-                return info.data
-        else:
+        if not self.is_internet_connected:
             log.loge("No internet connected,Could not use Qweather function")
-            return {"status":"error"}
+            return self.return_message("error","no internet connected","check")
+        info = QweatherInfo()
+        # 如果还未获取天气数据
+        if info.data.get("content") is None:
+            info.key = config.mainconfig.get("weather").get("qweather").get("key")
+            info.license = config.mainconfig.get("weather").get("qweather").get("license")
+            # 获取密钥和证书
+            if info.key is None or info.license is None:
+                log.loge(_(f"Failed to load Qweather key and license"))
+                return self.return_message("error",_("empty key or license"),_("register"))
+            # 未获得城市定位
+            if len(info.city_id) == 0:
+                log.log(_("Get location via internet"))
+
+                info.name = config.mainconfig.get("weather").get("location").get("city")
+                country = config.mainconfig.get("weather").get("location").get("country")
+                region = config.mainconfig.get("weather").get("location").get("regionName")
+                city = config.mainconfig.get("weather").get("location").get("city")
+                if country is None or region is None or city is None:
+                    log.loge(_("Failed to get city name,Can't run locating function"))
+                    return self.return_message("error",_("empty city name"),_("relocate"))
+
+                info.full_name = country + region + city
+                # 和风天气API - 地理位置
+                geourl = "https://geoapi.qweather.com/v2/city/lookup?location=" + info.name + "&key=" + info.key
+                try:
+                    response = get(geourl).json()
+                    if response.get("code") != "200":
+                        log.loge(f"Unable to get weather infomation , error code is {response['code']}")
+                        return self.return_message("error",_("fail to locate"),_("check"))
+                    info.city_id = response.get("location")[0].get("id")
+                    log.log("Get location from https://geoapi.qweather.com/v2/city")
+                except exceptions.Timeout:
+                    log.loge("Could not connect Qweather server,please check Internet connnection!")
+                    return self.return_message("error",_("timeout"),_("try again"))
+                    
+            # 和风天气所有天气API
+            url_list = []
+            if info.license == "dev":
+                url_list = [
+                    f'https://devapi.qweather.com/v7/weather/now?key={info.key}&location={info.city_id}',
+                    f'https://devapi.qweather.com/v7/astronomy/sun?key={info.key}&location={info.city_id}&date={info.time}',
+                    f'https://devapi.qweather.com/v7/astronomy/moon?key={info.key}&location={info.city_id}&date={info.time}',
+                    f'https://devapi.qweather.com/v7/warning/now?key={info.key}&location={info.city_id}',
+                    f'https://devapi.qweather.com/v7/weather/7d?key={info.key}&location={info.city_id}'
+                ]
+                log.log("Chose developer key & license")
+            elif info.license == "business":
+                url_list = [
+                    f'https://api.qweather.com/v7/weather/now?key={info.key}&location={info.city_id}',
+                    f'https://api.qweather.com/v7/astronomy/sun?key={info.key}&location={info.city_id}&date={info.time}',
+                    f'https://api.qweather.com/v7/astronomy/moon?key={info.key}&location={info.city_id}&date={info.time}',
+                    f'https://api.qweather.com/v7/warning/now?key={info.key}&location={info.city_id}',
+                    f'https://api.qweather.com/v7/weather/7d?key={info.key}&location={info.city_id}',
+                    f"https://api.qweather.com/v7/astronomy/solar-elevation-angle?key={info.key}&location={info.city_id}&date={info.time}&tz={info.timezone}&alt={info.alt}"
+                ]
+                log.log("Chose business key & license")
+            else:
+                log.logw("Unknown license,choose default key & license")
+            # 多线程
+            weather_thread = ThreadPoolExecutor(max_workers=5)
+            results = weather_thread.map(self._load_from_internet_,url_list)
+            # 读取返回的结果
+            result_name = ["now","sun","moon","warning","7d"]
+            for item,result_type in zip(results,result_name):
+                info.data["content"][result_type] = item
+            info.data["status"] = "success"
+            config.mainconfig["weather"]["weather"] = info.data
 
     # 获取天气数据 - 来自OpenWeather
     def get_weather_openweather(self):
-        if self.is_internet_connected:
-            pass
-        else:
+        if not self.is_internet_connected:
             log.loge("No internet connected,Could not use Openweather function")
-            return {"status":"error"}
+            return self.return_message("error",_("no internet connected"),_("check"))
+
+    def return_message(self,status : str,message : str ,advice : str) -> dict:
+        """Return message in dict format"""
+        return {
+            "status" : status,
+            "message" : message,
+            "advice" : advice
+        }
     
     # 从网络中下载数据
     def _load_from_internet_(self,url) -> str:
+        """Download"""
         try:
             response = get(url).json()
             return response
         except exceptions.ConnectionError:
             log.loge(f"Failed to get from {url}")
-
-    # 从文件中获取数据
-    def _load_from_file(self,filename) -> str:
-        if os.path.isfile(filename):
-            with open(filename,mode="r",encoding="utf-8") as file:
-                data = json.load(file)
-            log.log(f"Loaded {filename}")
-            return data
-        else:
-            log.loge(f"Failed to find {filename}")

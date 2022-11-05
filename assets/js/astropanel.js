@@ -1,6 +1,6 @@
 $(document).ready(function () {
     const url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
-    const socket = io.connect(url, { path: location.pathname + '/socket.io' });
+    const socket = io.connect(url, { path: location.pathname + 'socket.io' });
     socket.on('emit', function () {
         client.emit('PING');
     });

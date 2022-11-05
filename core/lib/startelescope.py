@@ -49,8 +49,6 @@ class startelescope(m_telescope):
         img = wx.Image(config.assets["textures"]["device"]["telescope"]["m_d_ts_stop"],wx.BITMAP_TYPE_PNG).Scale(64,64,wx.IMAGE_QUALITY_HIGH)
         self.m_ts_c_b_stop.SetBitmap(wx.Bitmap(img,wx.BITMAP_SCREEN_DEPTH))
         
-        img = wx.Image(config.assets["textures"]["device"]["telescope"]["m_d_ts_goto"],wx.BITMAP_TYPE_PNG).Scale(16,16,wx.IMAGE_QUALITY_HIGH)
-        self.m_ts_c_b_goto.SetBitmap(wx.Bitmap(img,wx.IMAGE_QUALITY_HIGH))
 
     def __del__(self):
         return super().__del__()

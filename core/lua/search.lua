@@ -18,5 +18,25 @@ Boston, MA 02110-1301, USA.
 
 ]]--
 
-local json = require("lua.json")
+-- Load Library
+local json = require("lib.json")
+if json == nil then
+    print("Failed to load json library")
+end
+-- Load Library
+local httpc = require("lib.http").new()
+if httpc == nil then
+    print("Could not load http lib")
+end
+
+local ok, err, ssl_session = httpc:connect({
+    scheme = "http",
+    host = "127.0.0.1",
+    port = 8080,
+})
+
+if not ok then
+    ngx.log(ngx.ERR, "connection failed: ", err)
+    return
+end
 

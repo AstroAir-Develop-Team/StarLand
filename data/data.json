@@ -1,0 +1,5 @@
+{
+    "data" : {
+        "stardata" : ["data/stardata/Messier.json","data/stardata/NGCIC.json"]
+    }
+}

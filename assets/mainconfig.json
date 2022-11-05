@@ -1,0 +1,33 @@
+{
+    "weather" : {
+        "qweather" : {
+            "key" : "9a8b356b8c8b47a4956c0728b427e01a",
+            "license" : "dev"
+        },
+        "location" : {
+
+        },
+        "weather" : {
+
+        },
+        "hitokoto" : {
+            "url" : "https://v1.hitokoto.cn/",
+            "data" : {
+                "from" : "",
+                "word" : ""
+            }
+        }
+    },
+    "server" : {
+        "main" : {
+            "host" : "127.0.0.1",
+            "port" : 8000,
+            "config" : {
+                "key" : "starland",
+                "cookie_name" : "starland",
+                "static" : "../../assets/",
+                "template" : "../../assets/templates/"
+            }
+        }
+    }
+}

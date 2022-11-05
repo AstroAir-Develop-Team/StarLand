@@ -7,6 +7,7 @@ logs/
 test/
 *.tle
 test.py
+.vscode
 
 # C extensions
 *.so
