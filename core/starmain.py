@@ -67,15 +67,32 @@ class starmain ( m_main_frame ):
 
     def __init__( self, parent ):
         super().__init__ ( parent)  
+
         self.parent = parent
         self.SetIcon(wx.Icon(config.assets.get("textures").get("icon"),wx.BITMAP_TYPE_ICO))
         
         self.m_main_device = stardevice(self.m_main_device)
+        self.m_main_server = m_server_panel(self.m_main_server)
         self.m_main_weather = starweather(self.m_main_weather)
 
     def __del__(self):
         return super().__del__()
+    
+    def on_frame_close(self, event):
+        """Event on frame close"""
+        log.log(_("Destroy main frame , it is the time to say goodbye"))
+        self.Destroy()
+        exit(0)
+
+    def on_frame_hide(self, event):
+        """Event on frame hide"""
+        return super().on_frame_hide(event)
+
+    def on_frame_show(self, event):
+        """Event on frame show"""
+        return super().on_frame_show(event)
 
     def on_page_close(self, event):
+        """Event on aui noteboook page close"""
         print(str(event))
         return super().on_page_close(event)

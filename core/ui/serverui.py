@@ -20,15 +20,16 @@ _ = gettext.gettext
 
 class m_server_panel ( wx.Panel ):
 
-	def __init__( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 780,600 ), style = wx.TAB_TRAVERSAL, name = wx.EmptyString ):
+	def __init__( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 2000,1200 ), style = wx.TAB_TRAVERSAL, name = wx.EmptyString ):
 		wx.Panel.__init__ ( self, parent, id = id, pos = pos, size = size, style = style, name = name )
 
+		self.SetMinSize( wx.Size( 780,600 ) )
 		self.m_mgr = wx.aui.AuiManager()
 		self.m_mgr.SetManagedWindow( self )
 		self.m_mgr.SetFlags(wx.aui.AUI_MGR_DEFAULT)
 
 		self.m_server_nb = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_DEFAULT_STYLE )
-		self.m_mgr.AddPane( self.m_server_nb, wx.aui.AuiPaneInfo() .Name( u"a_server_nb" ).Left() .Caption( _(u"Server") ).CloseButton( False ).PaneBorder( False ).Movable( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).Floatable( False ).MinSize( wx.Size( 300,-1 ) ).CentrePane() )
+		self.m_mgr.AddPane( self.m_server_nb, wx.aui.AuiPaneInfo() .Name( u"a_server_nb" ).Left() .Caption( _(u"Server") ).CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).Movable( False ).Dock().Fixed().DockFixed( True ).Floatable( False ).BestSize( wx.Size( 260,-1 ) ).MinSize( wx.Size( 260,300 ) ) )
 
 		self.m_server_buildin_panel = wx.Panel( self.m_server_nb, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		m_buildin_box = wx.BoxSizer( wx.VERTICAL )
@@ -74,6 +75,7 @@ class m_server_panel ( wx.Panel ):
 		m_buildin_main_container1.Add( self.m_buildin_host_t, 0, wx.ALL, 5 )
 
 		self.m_buildin_host = wx.TextCtrl( self.m_server_buildin_panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_buildin_host.SetMaxLength( 50 )
 		m_buildin_main_container1.Add( self.m_buildin_host, 0, wx.ALL, 5 )
 
 		self.m_buildin_port_t = wx.StaticText( self.m_server_buildin_panel, wx.ID_ANY, _(u"Port"), wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -111,7 +113,7 @@ class m_server_panel ( wx.Panel ):
 
 		m_buildin_main_box.Add( m_buildin_main_container2, 1, wx.EXPAND, 5 )
 
-		m_buildin_main_container3 = wx.FlexGridSizer( 0, 2, 0, 0 )
+		m_buildin_main_container3 = wx.FlexGridSizer( 0, 3, 0, 0 )
 		m_buildin_main_container3.SetFlexibleDirection( wx.BOTH )
 		m_buildin_main_container3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
@@ -124,11 +126,8 @@ class m_server_panel ( wx.Panel ):
 		self.m_buildin_restart = wx.Button( self.m_server_buildin_panel, wx.ID_ANY, _(u"Restart"), wx.DefaultPosition, wx.DefaultSize, 0 )
 		m_buildin_main_container3.Add( self.m_buildin_restart, 0, wx.ALL, 5 )
 
-		self.m_buildin_open = wx.Button( self.m_server_buildin_panel, wx.ID_ANY, _(u"Open"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		m_buildin_main_container3.Add( self.m_buildin_open, 0, wx.ALL, 5 )
 
-
-		m_buildin_main_box.Add( m_buildin_main_container3, 1, wx.EXPAND, 5 )
+		m_buildin_main_box.Add( m_buildin_main_container3, 1, wx.EXPAND, 0 )
 
 
 		m_buildin_container.Add( m_buildin_main_box, 1, wx.EXPAND, 5 )
@@ -142,8 +141,20 @@ class m_server_panel ( wx.Panel ):
 		m_buildin_box.Fit( self.m_server_buildin_panel )
 		self.m_server_nb.AddPage( self.m_server_buildin_panel, _(u"Buildin"), True, wx.NullBitmap )
 		self.m_panel57 = wx.Panel( self.m_server_nb, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		bSizer58 = wx.BoxSizer( wx.VERTICAL )
+
+
+		self.m_panel57.SetSizer( bSizer58 )
+		self.m_panel57.Layout()
+		bSizer58.Fit( self.m_panel57 )
 		self.m_server_nb.AddPage( self.m_panel57, _(u"ASCOM"), False, wx.NullBitmap )
 		self.m_panel58 = wx.Panel( self.m_server_nb, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		bSizer59 = wx.BoxSizer( wx.VERTICAL )
+
+
+		self.m_panel58.SetSizer( bSizer59 )
+		self.m_panel58.Layout()
+		bSizer59.Fit( self.m_panel58 )
 		self.m_server_nb.AddPage( self.m_panel58, _(u"INDI"), False, wx.NullBitmap )
 		self.m_panel59 = wx.Panel( self.m_server_nb, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer77 = wx.BoxSizer( wx.VERTICAL )
@@ -175,93 +186,61 @@ class m_server_panel ( wx.Panel ):
 		bSizer77.Fit( self.m_panel59 )
 		self.m_server_nb.AddPage( self.m_panel59, _(u"WebClient"), False, wx.NullBitmap )
 
-		self.m_terminal_panel = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_DEFAULT_STYLE )
-		self.m_mgr.AddPane( self.m_terminal_panel, wx.aui.AuiPaneInfo() .Name( u"a_terminal_nb" ).Left() .Caption( _(u"Terminal") ).CloseButton( False ).PaneBorder( False ).Movable( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).Floatable( False ).CentrePane() )
+		self.m_server_web_panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.m_mgr.AddPane( self.m_server_web_panel, wx.aui.AuiPaneInfo() .Name( u"a_server_web" ).Left() .CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).Movable( False ).Dock().Fixed().DockFixed( True ).Floatable( False ).MinSize( wx.Size( 300,300 ) ).CentrePane() )
 
-		self.m_shell_panel = wx.Panel( self.m_terminal_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		bSizer78 = wx.BoxSizer( wx.VERTICAL )
+		bSizer60 = wx.BoxSizer( wx.VERTICAL )
 
-		fgSizer109 = wx.FlexGridSizer( 0, 2, 0, 0 )
-		fgSizer109.SetFlexibleDirection( wx.BOTH )
-		fgSizer109.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-		bSizer80 = wx.BoxSizer( wx.VERTICAL )
-
-		self.m_button89 = wx.Button( self.m_shell_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer80.Add( self.m_button89, 0, wx.ALL, 5 )
-
-		self.m_button90 = wx.Button( self.m_shell_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer80.Add( self.m_button90, 0, wx.ALL, 5 )
-
-		self.m_button91 = wx.Button( self.m_shell_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer80.Add( self.m_button91, 0, wx.ALL, 5 )
-
-		self.m_button92 = wx.Button( self.m_shell_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer80.Add( self.m_button92, 0, wx.ALL, 5 )
-
-		self.m_button93 = wx.Button( self.m_shell_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer80.Add( self.m_button93, 0, wx.ALL, 5 )
-
-		self.m_button94 = wx.Button( self.m_shell_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer80.Add( self.m_button94, 0, wx.ALL, 5 )
-
-		self.m_button95 = wx.Button( self.m_shell_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer80.Add( self.m_button95, 0, wx.ALL, 5 )
+		self.m_button65 = wx.Button( self.m_server_web_panel, wx.ID_ANY, _(u"MyButton"), wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer60.Add( self.m_button65, 0, wx.ALL, 5 )
 
 
-		fgSizer109.Add( bSizer80, 1, wx.EXPAND, 5 )
-
-		fgSizer111 = wx.FlexGridSizer( 0, 1, 0, 0 )
-		fgSizer111.SetFlexibleDirection( wx.BOTH )
-		fgSizer111.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-		self.m_panel65 = wx.Panel( self.m_shell_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_panel65.SetMinSize( wx.Size( 400,200 ) )
-
-		fgSizer111.Add( self.m_panel65, 1, wx.EXPAND |wx.ALL, 5 )
-
-		bSizer82 = wx.BoxSizer( wx.VERTICAL )
-
-		fgSizer112 = wx.FlexGridSizer( 0, 2, 0, 0 )
-		fgSizer112.SetFlexibleDirection( wx.BOTH )
-		fgSizer112.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-		self.m_staticText278 = wx.StaticText( self.m_shell_panel, wx.ID_ANY, _(u"MyLabel"), wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText278.Wrap( -1 )
-
-		fgSizer112.Add( self.m_staticText278, 0, wx.ALL, 5 )
-
-		m_comboBox1Choices = []
-		self.m_comboBox1 = wx.ComboBox( self.m_shell_panel, wx.ID_ANY, _(u"Combo!"), wx.DefaultPosition, wx.DefaultSize, m_comboBox1Choices, 0 )
-		fgSizer112.Add( self.m_comboBox1, 0, wx.ALL, 5 )
-
-
-		bSizer82.Add( fgSizer112, 1, wx.EXPAND, 5 )
-
-
-		fgSizer111.Add( bSizer82, 1, wx.EXPAND, 5 )
-
-
-		fgSizer109.Add( fgSizer111, 1, wx.EXPAND, 5 )
-
-
-		bSizer78.Add( fgSizer109, 1, wx.EXPAND, 5 )
-
-
-		self.m_shell_panel.SetSizer( bSizer78 )
-		self.m_shell_panel.Layout()
-		bSizer78.Fit( self.m_shell_panel )
-		self.m_terminal_panel.AddPage( self.m_shell_panel, _(u"Shell"), True, wx.NullBitmap )
-		self.m_python_panel = wx.Panel( self.m_terminal_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_terminal_panel.AddPage( self.m_python_panel, _(u"Python"), False, wx.NullBitmap )
-		self.m_debug_panel = wx.Panel( self.m_terminal_panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_terminal_panel.AddPage( self.m_debug_panel, _(u"Debug"), False, wx.NullBitmap )
-
+		self.m_server_web_panel.SetSizer( bSizer60 )
+		self.m_server_web_panel.Layout()
+		bSizer60.Fit( self.m_server_web_panel )
 
 		self.m_mgr.Update()
+
+		# Connect Events
+		self.m_buildin_host.Bind( wx.EVT_TEXT, self.on_host_update )
+		self.m_buildin_host.Bind( wx.EVT_TEXT_MAXLEN, self.on_max_length )
+		self.m_buildin_port.Bind( wx.EVT_TEXT, self.on_port_update )
+		self.m_buildin_port.Bind( wx.EVT_TEXT_MAXLEN, self.on_max_length )
+		self.m_buildin_ssl_c.Bind( wx.EVT_CHECKBOX, self.on_server_ssl )
+		self.m_buildin_alone.Bind( wx.EVT_CHECKBOX, self.on_server_alone )
+		self.m_buildin_start.Bind( wx.EVT_BUTTON, self.on_server_start )
+		self.m_buildin_stop.Bind( wx.EVT_BUTTON, self.on_server_stop )
+		self.m_buildin_restart.Bind( wx.EVT_BUTTON, self.on_server_restart )
 
 	def __del__( self ):
 		self.m_mgr.UnInit()
 
+
+
+	# Virtual event handlers, override them in your derived class
+	def on_host_update( self, event ):
+		event.Skip()
+
+	def on_max_length( self, event ):
+		event.Skip()
+
+	def on_port_update( self, event ):
+		event.Skip()
+
+
+	def on_server_ssl( self, event ):
+		event.Skip()
+
+	def on_server_alone( self, event ):
+		event.Skip()
+
+	def on_server_start( self, event ):
+		event.Skip()
+
+	def on_server_stop( self, event ):
+		event.Skip()
+
+	def on_server_restart( self, event ):
+		event.Skip()
 
 

@@ -7,4 +7,5 @@ gps3>=0.33.3
 lupa>=1.13
 numpy>=1.23.1
 requests>=2.25.1
+tifffile>=2022.10.10
 wxPython>=4.2.0

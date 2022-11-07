@@ -143,6 +143,14 @@ class m_main_frame ( wx.Frame ):
 		self.m_main_device.SetToolTip( _(u"Device Page") )
 
 		self.m_main_container.AddPage( self.m_main_device, _(u"Device"), True, wx.NullBitmap )
+		self.m_main_server = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.Size( 2000,1200 ), wx.TAB_TRAVERSAL )
+		self.m_main_server.SetToolTip( _(u"Server Page") )
+
+		self.m_main_container.AddPage( self.m_main_server, _(u"Server"), False, wx.NullBitmap )
+		self.m_main_mod = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.m_main_mod.SetToolTip( _(u"Mod Page") )
+
+		self.m_main_container.AddPage( self.m_main_mod, _(u"Mod"), False, wx.NullBitmap )
 		self.m_main_weather = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		self.m_main_weather.SetToolTip( _(u"Weather Page") )
 
@@ -155,10 +163,6 @@ class m_main_frame ( wx.Frame ):
 		self.m_main_starinfo.SetToolTip( _(u"StarInfo Page") )
 
 		self.m_main_container.AddPage( self.m_main_starinfo, _(u"StarInfo"), False, wx.NullBitmap )
-		self.m_main_mod = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-		self.m_main_mod.SetToolTip( _(u"Mod Page") )
-
-		self.m_main_container.AddPage( self.m_main_mod, _(u"Mod"), False, wx.NullBitmap )
 		self.m_main_config = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		self.m_main_config.SetToolTip( _(u"Config Page") )
 

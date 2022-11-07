@@ -24,11 +24,21 @@ import sys
 import time
 import numpy
 from PIL import Image
+from tifffile import imsave
 
 from core.lib.exceptions import ZWO_IOError
 from core.lib.starlog import starlog
 
+from core.lib.utility import switch
+
+import gettext
+_ = gettext.gettext
+
 log = starlog(__name__)
+
+__version__ = "0.0.1"
+__author__ = "Max Qian"
+__license__ = "GPL3"
 
 # ASI_BAYER_PATTERN
 ASI_BAYER_RG = 0
@@ -155,7 +165,7 @@ class _ASI_CAMERA_INFO(ctypes.Structure):
                 break
         r['SupportedVideoFormat'] = []
         for i in range(len(self.SupportedVideoFormat)):
-            if self.SupportedVideoFormat[i] == ASI_IMG_END:
+            if self.SupportedVideoFormat[i] is ASI_IMG_END:
                 break
             r['SupportedVideoFormat'].append(self.SupportedVideoFormat[i])
 
@@ -215,6 +225,7 @@ class _ASI_INFO():
     _count : int        # 数量
     _id : int           # ID
     _name : str         # 名称
+    _sdk_version : str  # SDK版本
     _found = False       # 是否发现
     _connected = False   # 是否连接
     _in_exposure = False # 是否曝光
@@ -225,7 +236,12 @@ class _ASI_INFO():
     _bayer : int        # 拜尔类型
     _pixel : float      # 像素大小
     _bitdepth : int     # 位深
-    _bin = int          # 像素合并
+    _support_bin = int          # 像素合并
+
+    _highest_gain : int
+    _lowest_gain : int
+    _highest_offset : int
+    _lowest_offset : int
 
     _is_cool : bool
     _is_color : bool
@@ -237,7 +253,9 @@ class _EXPOSURE_INFO():
     _exp = 1
     _bin = 1
     _gain = 20
+    _gamma = 50
     _offset = 20
+    _brightness : int
     _is_save = True
     _filename : str
 
@@ -245,8 +263,14 @@ class _EXPOSURE_INFO():
     _roi_need_refresh = False
     _roi_width : int
     _roi_height : int
+    _start_width : int
+    _start_heigth : int
     _bins : int
     _image_type : int
+    _flip : bool
+
+    _temperature : float
+    _coolon : bool
 
 class zwoasi():
     """ASI Camera class"""
@@ -410,6 +434,8 @@ class zwoasi():
                                                     ctypes.POINTER(ctypes.c_long)]
         self.zwolib.ASIGetTriggerOutputIOConf.restype = ctypes.c_int
 
+        self.zwolib.ASIGetSDKVersion.restype = ctypes.c_char_p
+
         log.log(f"Processing ASILib completed")
 
     def return_message(self,tpye : str,message : str,advice : str = "") -> dict:
@@ -424,8 +450,8 @@ class zwoasi():
     def connect(self,name) -> dict:
         """Connect to camera & return false when error happens"""
         self.zwoinfo._count = self.zwolib.ASIGetNumOfConnectedCameras()
-        if self.zwoinfo._count == 0:
-            log.loge(f"No ASI camera been found,please check connection")
+        if self.zwoinfo._count is 0:
+            log.loge(_(f"No ASI camera been found,please check connection"))
             return self.return_message("error","no camera found","check connection")
         # 在所有相机中搜索需要连接的相机
         for _id in enumerate(self.zwoinfo._count):
@@ -434,9 +460,9 @@ class zwoasi():
             r = self.zwolib.ASIGetCameraProperty(prop, _id)
             prop_dict = prop.get_dict()
             if r:
-                log.loge(f"Fail to get camera property ,error code : {zwo_errors[r]}") 
+                log.loge(_(f"Fail to get camera property ,error code : {zwo_errors[r]}")) 
             # 找到对应名称相机
-            if prop_dict["Name"] == name:
+            if prop_dict["Name"] is name:
                 log.log(f"Found ASI camera : {name}")
                 self.zwoinfo._found = True
                 self.zwoinfo._id = prop_dict["CameraID"]
@@ -446,14 +472,19 @@ class zwoasi():
             # 打开相机
             r = self.zwolib.ASIOpenCamera(_id)
             if r:
-                log.loge(f"Fail to open camera ,error code : {zwo_errors[r]}") 
+                log.loge(_(f"Fail to open camera ,error code : {zwo_errors[r]}")) 
                 return self.return_message("error","fali to open camera","restart")
             r = self.zwolib.ASIInitCamera(_id)
             if r:
-                log.loge(f"Fail to initialize camera ,error code : {zwo_errors[r]}") 
+                log.loge(_(f"Fail to initialize camera ,error code : {zwo_errors[r]}")) 
                 return self.return_message("error","fali to initialize camera","restart")
-            log.log(f"Connect to {self.zwoinfo._name} successfully")
-            return self.return_message("success","connected")
+            log.log(_(f"Connect to {self.zwoinfo._name} successfully"))
+            log.log(_("Start to obtain camera related parameters"))
+            # 自动读取相机信息
+            if self.update_config().get("type") is not "success" or self.get_exposure_info().get("type") is not "success":
+                return self.return_message("error","fail","gg")
+            log.log(_("Acquired camera related parameters successfully"))
+            return self.return_message("success","connected","")
         log.loge(f"Failed to find {name}")
         return self.return_message("error","no appoint camera found","Reconnect the camera")
 
@@ -490,12 +521,66 @@ class zwoasi():
         self.zwoinfo._max_height = prop_dict["MaxHeight"]
         self.zwoinfo._max_width = prop_dict["MaxWidth"]
         self.zwoinfo._bayer = prop_dict["BayerPattern"]
-        self.zwoinfo._bin = prop_dict["SupportedBins"]
+        self.zwoinfo._support_bin = prop_dict["SupportedBins"]
         self.zwoinfo._pixel = prop_dict["PixelSize"]
         self.zwoinfo._bitdepth = prop_dict["BitDepth"]
 
         log.log(f"Get {self.zwoinfo._name} info successfully")
         return self.return_message("success",f"get {self.zwoinfo._name} info")
+
+    def get_exposure_info(self) -> dict:
+        """Get Exposure Info"""
+        # 获取相机画幅起始位置
+        start_x = ctypes.c_int()
+        start_y = ctypes.c_int()
+        r = self.zwolib.ASIGetStartPos(self.zwoinfo._id, start_x, start_y)
+        if r:
+            log.loge(_(f"Unable to get the starting position of camera frame ,error code : {zwo_errors[r]}"))
+            return self.return_message("error",_("get info error"),_("Unknown"))
+        self.exposureinfo._start_width = start_x.value
+        self.exposureinfo._start_heigth = start_y.value
+
+        #获取控件数量
+        num = ctypes.c_int()
+        r = self.zwolib.ASIGetNumOfControls(self.zwoinfo._id, num)
+        if r:
+            log.loge(_("Unable to get camera control type"))
+            return self.return_message("error","Unable to get camera control type","Unknown")
+        # 获取具体控件
+        caps = _ASI_CONTROL_CAPS()
+        for i in range(num.value):
+            r = self.zwolib.ASIGetControlCaps(self.zwoinfo._id, i, caps)
+            if r:
+                log.loge(_("Unable to obtain sequential exposure parameters"))
+                return self.return_message("error",_("Unable to obtain sequential exposure parameters"),_("Unknown"))
+            cap = caps.get_dict()
+            for case in switch(cap.get("ControlType")):
+                if case(ASI_GAIN):
+                    self.zwoinfo._highest_gain = cap.get("MaxValue")
+                    self.zwoinfo._lowest_gain = cap.get("MinValue")
+                    self.exposureinfo._gain = cap.get("DefaultValue")
+                    break
+                if case(ASI_OFFSET):
+                    self.zwoinfo._highest_offset = cap.get("MaxValue")
+                    self.zwoinfo._lowest_offset = cap.get("MinValue")
+                    self.exposureinfo._offset = cap.get("DefaultValue")
+                    break
+                if case(ASI_TEMPERATURE):
+                    self.exposureinfo._temperature = cap.get("DefaultValue")
+                    break
+                if case(ASI_GAMMA):
+                    self.exposureinfo._gamma = cap.get("DefaultValue")
+                    break
+                if case(ASI_BRIGHTNESS):
+                    self.exposureinfo._brightness = cap.get("DefaultValue")
+                    break
+                if case(ASI_COOLER_ON):
+                    if self.zwoinfo._is_cool:
+                        self.exposureinfo._coolon = cap.get("DefaultValue")
+                    break
+                if case(ASI_FLIP):
+                    self.exposureinfo._flip = cap.get("DefaultValue")
+                    break
 
     def start_exposure(self,params : dict) -> dict:
         """
@@ -515,10 +600,39 @@ class zwoasi():
             "filename" : str # filename to save
         }
         """
+        def get_exposure_status() -> int|dict:
+            """Get camera exposure status"""
+            status = ctypes.c_int()
+            r = self.zwolib.ASIGetExpStatus(self.zwoinfo._id, status)
+            if r:
+                log.loge(_(f"Unable to get camera exposure status"))
+                return self.return_message("error","Unable to get camera exposure status","Unknown")
+            return status.value
+        
+        def parser_exposure_status(ids : int) -> dict:
+            """Judge the exposure state of the camera (Do not use "match" , it is available in python 3.10)"""
+            for case in switch(ids):
+                if case(ASI_EXP_IDLE):
+                    break
+                if case(ASI_EXP_SUCCESS):
+                    break
+                if case(ASI_EXP_WORKING):
+                    log.logw(_("The camera is being exposed, please terminate the current task first"))
+                    return self.return_message("error",_("The camera is being exposed"),_("Please terminate the current task first"))
+                if case(ASI_EXP_FAILED):
+                    log.loge(_("Camera exposure error"))
+                    return self.return_message("error",_("Camera exposure error"),_("Check camera status"))
+            return self.return_message("success",_("success"),_("no"))
+                    
         # 若相机未连接则返回错误
         if not self.zwoinfo._connected:
             log.loge("Camera not connected,please do not start exposure")
             return self.return_message("error","no camera connected","run after connected")
+        # 检查相机当前状态
+        status = get_exposure_status()
+        if type(status) is dict or parser_exposure_status(status).get("type") is "error":
+            log.loge(_("Unable to start exposure"))
+            return self.return_message("error",_("Unable to start exposure"),_("GG"))
         # 若曝光时间异常则抛出警告
         if params.get("exp") <= 0:
             log.logw("Unrealistic exposure time, change to default exposure time")
@@ -537,7 +651,7 @@ class zwoasi():
         else:
             time.sleep(0.01)
         # 等待进度
-        while self.get_exposure_status() == ASI_EXP_WORKING:
+        while get_exposure_status() is ASI_EXP_WORKING:
             if params.get("poll"):
                 time.sleep(params.get("poll"))
             else:
@@ -565,15 +679,58 @@ class zwoasi():
         log.log(f"Aborted {self.zwoinfo._name} exposure")
         return self.return_message("success","aborted exposure")
 
-    def set_camera_config(self,params) -> dict:
+    def set_camera_config(self,params : dict) -> dict:
         """
         Set camera config
         @ params : {
             "bin" : int # pixel merge
             "gain" : int # gain
             "offset" : int # offset
+            "brightness" : int # brightness
+            "flip" : bool # Image flip
         }
         """
+        def set_camera_parameters(control_index : int,value,auto = False) -> dict:
+            """
+            Set camera related parameters
+            @ control_index : Control type
+            @ value : Value (int)
+            @ auto : Don't suggest
+            """
+            if not self.zwoinfo._connected:
+                log.loge("Camera not connected,please do not start exposure")
+                return self.return_message("error","no camera connected","run after connected")
+            if 0 <= control_index <= 20:
+                r = self.zwolib.ASISetControlValue(self.zwoinfo._id, control_index, value, auto)
+                if r:
+                    log.loge(_(f"Unable to set camera parameters,error code : {zwo_errors[r]}"))
+                    return self.return_message("error",_("Unable to set camera parameters"),_("GG"))
+            else:
+                log.loge(_("Unreasonable control type"))
+                return self.return_message("error",_("Unreasonable control type"),_("Unknown"))
+
+        bins = params.get("bin")
+        if  bins is not None:
+            if 0 < bins <= self.zwoinfo._support_bin:
+                r = self.zwolib.ASISetROIFormat(self.zwoinfo._id, self.exposureinfo._roi_width, self.exposureinfo._roi_height, bins, self.exposureinfo._image_type)
+                if r:
+                    log.loge(f"Failed to set bin mode , error code : {zwo_errors[r]}")
+                    return self.return_message("error","fail to set bin","try again")
+            else:
+                log.logw("Unsupport bin number,choose default setting")
+        for item in enumerate(params):
+            value = params.get(item)
+            p : int
+            if value is not None:
+                for case in switch(item):
+                    if case("gain"):
+                        p = ASI_GAIN
+                    if case("offset") or case("brightness"):
+                        p = ASI_BRIGHTNESS
+            if set_camera_parameters(p,value).get("type") is not "success":
+                return self.return_message("error","Unable to set gain","try again")
+        log.log(_("Successfully set camera parameters"))
+        return self.return_message("success",_("Successfully set camera parameters"),"")
 
     def save_image(self,filename : str,tpye = "jpg") -> dict:
         """
@@ -616,10 +773,10 @@ class zwoasi():
         # 计算图像大小
         imgsize = self.exposureinfo._roi_height * self.exposureinfo._roi_width
         # 24位图像
-        if self.exposureinfo._image_type == ASI_IMG_RGB24:
+        if self.exposureinfo._image_type is ASI_IMG_RGB24:
             imgsize *= 3
         # 16位图像
-        elif self.exposureinfo._image_type == ASI_IMG_RAW16:
+        elif self.exposureinfo._image_type is ASI_IMG_RAW16:
             imgsize *= 2
         buffer = bytearray(imgsize)
         # 获取图像数据
@@ -631,32 +788,32 @@ class zwoasi():
         # 处理图像 - 基于numpy
         img = None
         shape = [self.exposureinfo._roi_height,self.exposureinfo._roi_width]
-        if self.exposureinfo._image_type == ASI_IMG_RAW8 or self.exposureinfo._image_type == ASI_IMG_Y8:
+        if self.exposureinfo._image_type is ASI_IMG_RAW8 or self.exposureinfo._image_type is ASI_IMG_Y8:
             img = numpy.frombuffer(buffer=buffer, dtype=numpy.uint8)
-        elif self.exposureinfo._image_type == ASI_IMG_RAW16:
+        elif self.exposureinfo._image_type is ASI_IMG_RAW16:
             img = numpy.frombuffer(buffer=buffer, dtype=numpy.uint16)
-        elif self.exposureinfo._image_type == ASI_IMG_RGB24:
+        elif self.exposureinfo._image_type is ASI_IMG_RGB24:
             img = numpy.frombuffer(buffer=buffer, dtype=numpy.uint8)
             shape.append(3)
         else:
             log.logw("Unsupported image type")
         img = img.reshape(shape)
+        if len(img.shape) is 3:
+            img = img[:, :, ::-1]  # Convert BGR to RGB
         # 保存JPG图像
-        if tpye == "jpg":
+        if tpye.lower() is "jpg":
             mode = None
-            if len(img.shape) == 3:
-                img = img[:, :, ::-1]  # Convert BGR to RGB
-            if self.exposureinfo._image_type == ASI_IMG_RAW16:
+            if self.exposureinfo._image_type is ASI_IMG_RAW16:
                 mode = 'I;16'
             image = Image.fromarray(img, mode=mode)
             image.save(imgpath)
             log.log(f"Save image to {imgpath}")
         # 保存FIT图像
-        elif tpye == "fit" or tpye == "fits":
+        elif tpye.lower() is "fit" or tpye.lower() is "fits":
             pass
         # 保存TIFF图像
-        elif tpye == "tiff":
-            pass
+        elif tpye.lower() is "tiff":
+            imsave(imgpath,img)
         # 保存个锤子
         else:
             log.loge("Unsupported image type")
