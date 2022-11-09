@@ -47,7 +47,7 @@ from typing import List
 import dateutil.parser
 from core.lib.pyascom.docenum import DocIntEnum
 from core.lib.pyascom.device import Device
-from core.lib.pyascom.exceptions import *
+from core.lib.pyascom.exceptions import NotImplementedException
 
 class AlignmentModes(DocIntEnum):
     """The geometry of the mount"""
@@ -132,7 +132,7 @@ class Telescope(Device):
                 The device did not *successfully* complete the request.
 
         """
-        super().__init__(address, "telescope", device_number, protocol)
+        super().__init__(address, "telescope",device_number, protocol)
 
     @property
     def AlignmentMode(self) -> AlignmentModes:

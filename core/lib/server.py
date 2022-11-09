@@ -82,6 +82,11 @@ def not_found(error):
 def server_error(error):
     return render_template(config.assets.get("web").get("500"))
 
+@socketio.on("client",namespace="/client")
+def client(ws):
+    """Web server"""
+
+
 class starserver():
     """Buildin server"""
     # 运行服务器

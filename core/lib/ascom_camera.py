@@ -18,27 +18,17 @@ Boston, MA 02110-1301, USA.
 
 """
 
-import socket
+from core.lib.pyascom.camera import Camera
 
-def check_port_in_use(url : str) -> bool:
-    """
-    Check whether the port is occupied. The default is to check the local IP address
-    """
-    host , port = url.split(":")
-    s = None
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(1)
-        s.connect((host, int(port)))
-        return True
-    except socket.error:
-        return False
-    finally:
-        if s:
-            s.close()
+from core.lib.starlog import starlog
 
-def discovery_ipv4(host = "127.0.0.1" , port = list):
-    """Discover ports used under IPv4"""
+log = starlog(__name__)
 
-def discovery_ipv6(host = "127.0.0.1" , port = list):
-    """Discover ports used under IPv6"""
+class camera():
+    """Camera class based on ASCOM"""
+
+    def __init__(self) -> None:
+        pass
+
+    def __del__(self) -> None:
+        pass

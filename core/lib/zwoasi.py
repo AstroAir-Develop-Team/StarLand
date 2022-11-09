@@ -33,6 +33,7 @@ from core.lib.utility import switch
 
 import gettext
 _ = gettext.gettext
+_p = os.path.join
 
 log = starlog(__name__)
 
@@ -450,7 +451,7 @@ class zwoasi():
     def connect(self,name) -> dict:
         """Connect to camera & return false when error happens"""
         self.zwoinfo._count = self.zwolib.ASIGetNumOfConnectedCameras()
-        if self.zwoinfo._count is 0:
+        if self.zwoinfo._count == 0:
             log.loge(_(f"No ASI camera been found,please check connection"))
             return self.return_message("error","no camera found","check connection")
         # 在所有相机中搜索需要连接的相机
@@ -481,7 +482,7 @@ class zwoasi():
             log.log(_(f"Connect to {self.zwoinfo._name} successfully"))
             log.log(_("Start to obtain camera related parameters"))
             # 自动读取相机信息
-            if self.update_config().get("type") is not "success" or self.get_exposure_info().get("type") is not "success":
+            if self.update_config().get("type") != "success" or self.get_exposure_info().get("type") != "success":
                 return self.return_message("error","fail","gg")
             log.log(_("Acquired camera related parameters successfully"))
             return self.return_message("success","connected","")
@@ -630,7 +631,7 @@ class zwoasi():
             return self.return_message("error","no camera connected","run after connected")
         # 检查相机当前状态
         status = get_exposure_status()
-        if type(status) is dict or parser_exposure_status(status).get("type") is "error":
+        if type(status) is dict or parser_exposure_status(status).get("type") == "error":
             log.loge(_("Unable to start exposure"))
             return self.return_message("error",_("Unable to start exposure"),_("GG"))
         # 若曝光时间异常则抛出警告
@@ -727,7 +728,7 @@ class zwoasi():
                         p = ASI_GAIN
                     if case("offset") or case("brightness"):
                         p = ASI_BRIGHTNESS
-            if set_camera_parameters(p,value).get("type") is not "success":
+            if set_camera_parameters(p,value).get("type") != "success":
                 return self.return_message("error","Unable to set gain","try again")
         log.log(_("Successfully set camera parameters"))
         return self.return_message("success",_("Successfully set camera parameters"),"")
@@ -798,10 +799,10 @@ class zwoasi():
         else:
             log.logw("Unsupported image type")
         img = img.reshape(shape)
-        if len(img.shape) is 3:
+        if len(img.shape) == 3:
             img = img[:, :, ::-1]  # Convert BGR to RGB
         # 保存JPG图像
-        if tpye.lower() is "jpg":
+        if tpye.lower() == "jpg":
             mode = None
             if self.exposureinfo._image_type is ASI_IMG_RAW16:
                 mode = 'I;16'
@@ -809,13 +810,74 @@ class zwoasi():
             image.save(imgpath)
             log.log(f"Save image to {imgpath}")
         # 保存FIT图像
-        elif tpye.lower() is "fit" or tpye.lower() is "fits":
+        elif tpye.lower() == "fit" or tpye.lower() == "fits":
             pass
         # 保存TIFF图像
-        elif tpye.lower() is "tiff":
+        elif tpye.lower() == "tiff":
             imsave(imgpath,img)
         # 保存个锤子
         else:
             log.loge("Unsupported image type")
             return self.return_message("error","Unsupported image type")
-        
+
+    def start_video(self) -> dict:
+        """Start video capture"""
+        # 检查相机是否连接
+        if not self.zwoinfo._connected:
+            log.loge("Camera not connected,please do not start exposure")
+            return self.return_message("error","no camera connected","run after connected")
+        # 相机是否已经开始视频拍摄
+        if self.zwoinfo._in_video or self.zwoinfo._in_exposure:
+            log.loge(_("The camera has started video capture"))
+            return self.return_message("error",_("The camera has started video capture"),_("try again"))
+        log.log(_("Try to start video capture"))
+        # 开始视频拍摄
+        r = self.zwolib.ASIStartVideoCapture(self.zwoinfo._id)
+        if r:
+            log.loge(_(f"Unable to start video capture , error code {zwo_errors[r]}"))
+            return self.return_message("error",_("Unable to start video capture"),_("try again"))
+        self.zwoinfo._in_video = True
+        log.log(_("Started video capture"))
+        return self.return_message("success",_("Successfully started video capture"),"")
+    
+    def stop_video(self) -> dict:
+        """Stop video capture"""
+        if self.zwoinfo._in_video:
+            r = self.zwolib.ASIStopVideoCapture(self.zwoinfo._id)
+            if r:
+                log.loge(_(f"Unable to stop camera video capture , error code {zwo_errors[r]}"))
+                return self.return_message("error",_("Unable to stop camera video capture"),_("GG"))
+            self.zwoinfo._in_video = False
+            return self.return_message("success",_("Successfully stopped camera video capture"),"")
+        log.logw(_("The camera is not in the video capture state, please do not perform this function"))
+        return self.return_message("error",_("The camera is not in the video capture state, please do not perform this function"),_("GG"))
+
+    def save_video(self,params = {"timeout" : float,"filename" : str}) -> dict:
+        """Save video data"""
+        if self.zwoinfo._in_video:
+            log.loge(_("The camera has started video capture"))
+            return self.return_message("error",_("The camera has started video capture"),_("try again"))
+        _filename = _p(_p(_p(os.getcwd(),"image"),"video"),params.get("filename"))
+        if os.path.isfile(_filename + ".mp4"):
+            log.logw(_("The file already exists and will be renamed automatically"))
+            _filename += "1"
+        _filename += ".mp4"
+
+        buffer = None
+        # 设置视频画幅大小
+        imgsize = self.exposureinfo._roi_height * self.exposureinfo._roi_width
+        # 24位图像
+        if self.exposureinfo._image_type is ASI_IMG_RGB24:
+            imgsize *= 3
+        # 16位图像
+        elif self.exposureinfo._image_type is ASI_IMG_RAW16:
+            imgsize *= 2
+        buffer = bytearray(imgsize)
+        size = len(buffer)
+        cbuf_type = ctypes.c_char * len(buffer)
+        cbuf = cbuf_type.from_buffer(buffer)
+        r = self.zwolib.ASIGetVideoData(self.zwoinfo._id, cbuf, size, int(params.get("timeout")))
+        if r:
+            log.loge(_(f"Unable to get video data ,error code {zwo_errors[r]}"))
+            return self.return_message("error",_("Unable to get video data"),_("GG"))
+            

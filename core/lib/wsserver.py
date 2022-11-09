@@ -18,27 +18,17 @@ Boston, MA 02110-1301, USA.
 
 """
 
-import socket
+from flask import Flask
+from flask_socketio import SocketIO,emit
 
-def check_port_in_use(url : str) -> bool:
-    """
-    Check whether the port is occupied. The default is to check the local IP address
-    """
-    host , port = url.split(":")
-    s = None
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(1)
-        s.connect((host, int(port)))
-        return True
-    except socket.error:
-        return False
-    finally:
-        if s:
-            s.close()
+app = Flask(__name__)
+wsserver = SocketIO(app)
 
-def discovery_ipv4(host = "127.0.0.1" , port = list):
-    """Discover ports used under IPv4"""
+@wsserver.on('connect', namespace='/ws')
+# 函数名在内核事件中没有要求，只要不和关键字重复
+def connect():
+    """Connect"""
 
-def discovery_ipv6(host = "127.0.0.1" , port = list):
-    """Discover ports used under IPv6"""
+@wsserver.on('disconnect', namespace='/ws')
+def disconnect():
+    """Disconnect"""
