@@ -28,12 +28,15 @@ log = starlog(__name__)
 class qhyccd():
 
     def __init__(self) -> None:
+        """Initialize"""
         self.qhylib = None
 
     def __del__(self) -> None:
+        """Close"""
         self.disconnect()
 
     def init(self) -> None:
+        """Initialize"""
         if self.qhylib is not None:
             return
         _p = os.path.join
@@ -53,10 +56,10 @@ class qhyccd():
         self.init_dll()
 
     def init_dll(self) -> None:
-        pass
+        """Initialize qhyccd library"""
     
     def connect(self,name) -> dict:
-        pass
+        """Connect"""
 
     def disconnect(self) -> dict:
-        pass
+        """Disconnect"""

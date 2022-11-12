@@ -16,7 +16,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-from gps3 import gps3
+import core.lib.gps3 as gps3
 from flask import Flask, render_template
 from flask_wtf import CSRFProtect
 from flask_socketio import SocketIO

@@ -21,7 +21,6 @@ Boston, MA 02110-1301, USA.
 import wx
 import os,sys,importlib
 from json import load , JSONDecodeError
-
 import core.lib.i18n
 
 from core.lib.starlog import starlog
@@ -69,11 +68,9 @@ def main() -> None:
         # 创建实例
         app = wx.App()
         # 先加载模组界面
-        try:
-            mod = importlib.import_module('core.starloader')
-        except ImportError:
-            log.loge(_("Could not find core.starloader,please check it ,if there is any unknwon problem ,please contact the developer"))
-        frame = mod.starloaderframe()
+        
+        from core.starloader import starloaderframe
+        frame = starloaderframe()
         frame.Show()
         # 主循环
         app.MainLoop()

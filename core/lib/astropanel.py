@@ -1,6 +1,7 @@
 # coding=utf-8
 
 """
+
 Copyright(c) 2019 Radek Kaczorek  <rkaczorek AT gmail DOT com>
 
 This library is free software; you can redistribute it and/or
@@ -16,6 +17,7 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
+
 """
 
 from flask import Flask, render_template

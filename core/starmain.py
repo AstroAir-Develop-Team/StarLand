@@ -22,6 +22,7 @@ import threading
 from core.ui.mainui import m_main_frame
 from core.ui.starinfoui import m_starinfo_panel
 from core.ui.serverui import m_server_panel
+from core.ui.deviceui import m_device_panel
 from core.starweather import starweather
 from core.stardevice import stardevice
 from core.starsearch import starsearch
@@ -71,7 +72,7 @@ class starmain ( m_main_frame ):
         self.parent = parent
         self.SetIcon(wx.Icon(config.assets.get("textures").get("icon"),wx.BITMAP_TYPE_ICO))
         
-        self.m_main_device = stardevice(self.m_main_device)
+        self.m_main_device = m_device_panel(self.m_main_device)
         self.m_main_server = m_server_panel(self.m_main_server)
         self.m_main_weather = starweather(self.m_main_weather)
 

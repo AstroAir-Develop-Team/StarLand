@@ -141,6 +141,7 @@ class m_main_frame ( wx.Frame ):
 
 		self.m_main_device = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		self.m_main_device.SetToolTip( _(u"Device Page") )
+		self.m_main_device.SetMinSize( wx.Size( 1920,1080 ) )
 
 		self.m_main_container.AddPage( self.m_main_device, _(u"Device"), True, wx.NullBitmap )
 		self.m_main_server = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.Size( 2000,1200 ), wx.TAB_TRAVERSAL )
