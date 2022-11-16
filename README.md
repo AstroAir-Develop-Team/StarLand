@@ -10,7 +10,6 @@ Dependencies are minimal:
 * [Flask](https://pypi.org/project/Flask)
 * [Flask-wtf](https://pypi.org/project/Flask-WTF)
 * [Flask-SocketIO](https://pypi.org/project/Flask-SocketIO)
-* [gps3](https://pypi.org/project/gps3)
 * [lupa](https://pypi.org/project/lupa)
 * [numpy](https://pypi.org/project/numpy)
 * [requests](https://pypi.org/project/requests/)

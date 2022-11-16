@@ -23,7 +23,7 @@ Boston, MA 02110-1301, USA.
 class astrometry():
     """Astrometry"""
 
-    url = 'https://nova.astrometry.net/api/'
+    default_url = 'https://nova.astrometry.net/api/'
 
     def __init__(self) -> None:
         """Construct"""
