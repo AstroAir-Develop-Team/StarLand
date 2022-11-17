@@ -81,7 +81,7 @@ class Qweather():
         """Get location via internet"""
         if not self.is_internet_connected:
             log.loge(_("No internet connected,Could not use locate function"))
-            return self.return_message("error",_("no internet connected",_("check")))
+            return self.return_message("error",_("no internet connected"),_("check"))
         try:
             # 获取基于互联网定位的本机IP
             ip = json.loads(get("https://httpbin.org/ip").text).get("origin")
@@ -94,7 +94,7 @@ class Qweather():
         # 连接错误
         except exceptions.ConnectionError:
             log.loge(_("Could not connect Location server,please check Internet connnection!"))
-            return self.return_message("error","connection error","unknown")            
+            return self.return_message("error",_("connection error"),_("unknown"))            
     
     # 每日一言，有一部分是傻波语录
     def hitokoto(self) -> dict:
@@ -116,8 +116,8 @@ class Qweather():
     def get_weather_qweather(self):
         # 如果互联网未连接则不会执行任何操作
         if not self.is_internet_connected:
-            log.loge("No internet connected,Could not use Qweather function")
-            return self.return_message("error","no internet connected","check")
+            log.loge(_("No internet connected,Could not use Qweather function"))
+            return self.return_message("error",_("no internet connected"),_("check"))
         info = QweatherInfo()
         # 如果还未获取天气数据
         if info.data.get("content") is None:
@@ -145,12 +145,12 @@ class Qweather():
                 try:
                     response = get(geourl).json()
                     if response.get("code") != "200":
-                        log.loge(f"Unable to get weather infomation , error code is {response['code']}")
+                        log.loge(_(f"Unable to get weather infomation , error code is {response['code']}"))
                         return self.return_message("error",_("fail to locate"),_("check"))
                     info.city_id = response.get("location")[0].get("id")
                     log.log("Get location from https://geoapi.qweather.com/v2/city")
                 except exceptions.Timeout:
-                    log.loge("Could not connect Qweather server,please check Internet connnection!")
+                    log.loge(_("Could not connect Qweather server,please check Internet connnection!"))
                     return self.return_message("error",_("timeout"),_("try again"))
                     
             # 和风天气所有天气API
@@ -173,9 +173,9 @@ class Qweather():
                     f'https://api.qweather.com/v7/weather/7d?key={info.key}&location={info.city_id}',
                     f"https://api.qweather.com/v7/astronomy/solar-elevation-angle?key={info.key}&location={info.city_id}&date={info.time}&tz={info.timezone}&alt={info.alt}"
                 ]
-                log.log("Chose business key & license")
+                log.log(_("Chose business key & license"))
             else:
-                log.logw("Unknown license,choose default key & license")
+                log.logw(_("Unknown license,choose default key & license"))
             # 多线程
             weather_thread = ThreadPoolExecutor(max_workers=5)
             results = weather_thread.map(self._load_from_internet_,url_list)
@@ -189,7 +189,7 @@ class Qweather():
     # 获取天气数据 - 来自OpenWeather
     def get_weather_openweather(self):
         if not self.is_internet_connected:
-            log.loge("No internet connected,Could not use Openweather function")
+            log.loge(_("No internet connected,Could not use Openweather function"))
             return self.return_message("error",_("no internet connected"),_("check"))
 
     def return_message(self,status : str,message : str ,advice : str) -> dict:

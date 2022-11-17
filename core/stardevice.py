@@ -25,8 +25,8 @@ import wx
 _ = gettext.gettext
 
 import core.ui.images as imglib
-from core.lib.starcamera import starcamera
-from core.lib.startelescope import startelescope
+from core.device.ui.starcamera import starcamera
+from core.device.ui.startelescope import startelescope
 
 class stardevice(wx.Panel):
 

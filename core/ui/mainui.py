@@ -136,7 +136,7 @@ class m_main_frame ( wx.Frame ):
 
 		self.SetMenuBar( self.m_menubar )
 
-		self.m_main_container = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_DEFAULT_STYLE )
+		self.m_main_container = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 1000,1000 ), wx.aui.AUI_NB_DEFAULT_STYLE )
 		self.m_mgr.AddPane( self.m_main_container, wx.aui.AuiPaneInfo() .Name( u"a_main_nb" ).Left() .CaptionVisible( False ).CloseButton( False ).PinButton( True ).PaneBorder( False ).Movable( False ).Dock().Fixed().BestSize( wx.Size( 854,480 ) ).MinSize( wx.Size( 854,480 ) ).CentrePane() )
 
 		self.m_main_device = wx.Panel( self.m_main_container, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )

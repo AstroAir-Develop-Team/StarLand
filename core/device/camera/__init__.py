@@ -18,15 +18,6 @@ Boston, MA 02110-1301, USA.
 
 """
 
-from core.lib.search import search
-from core.ui.searchui import m_search_panel
-
-import wx
-
-class starsearch(m_search_panel):
-    
-    def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.Size(710,600), style=wx.TAB_TRAVERSAL, name=wx.EmptyString):
-        super().__init__(parent, id, pos, size, style, name)
-
-    def __del__(self):
-        return super().__del__()
+__version__ = "1.0.0"
+__author__ = "Max Qian"
+__license__ = "GPL3"

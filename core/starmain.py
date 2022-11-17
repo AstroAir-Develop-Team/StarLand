@@ -1,7 +1,9 @@
 # coding=utf-8
 
 """
+
 Copyright(c) 2022 Max Qian  <astroair.cn>
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public
 License version 3 as published by the Free Software Foundation.
@@ -13,45 +15,26 @@ You should have received a copy of the GNU Library General Public License
 along with this library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
-"""
 
-import wx
-import threading
+"""
 
 # 所有的内置UI
 from core.ui.mainui import m_main_frame
-from core.ui.starinfoui import m_starinfo_panel
 from core.ui.serverui import m_server_panel
-from core.ui.deviceui import m_device_panel
+from core.device.ui.stardeivce import stardevice
+
 from core.starweather import starweather
-from core.stardevice import stardevice
-from core.starsearch import starsearch
-
-from core.ui.taskbaricon import m_taskbar_icon
-from core.ui.aboutui import m_ahout_ui
-
-import core.ui.images as imglib
+from core.device.ui.stardeivce import stardevice
 
 import config
 
 # 所有的内置库
-from core.lib.qweather import Qweather
 from core.lib.starlog import starlog
-from core.lib.server import starserver
 
 import gettext
 _ = gettext.gettext
 
 log = starlog(__name__)
-
-# -*- coding: utf-8 -*-
-
-###########################################################################
-## Python code generated with wxFormBuilder (version 3.10.1-8e3463c)
-## http://www.wxformbuilder.org/
-##
-## PLEASE DO *NOT* EDIT THIS FILE!
-###########################################################################
 
 import wx
 import wx.xrc
@@ -72,7 +55,7 @@ class starmain ( m_main_frame ):
         self.parent = parent
         self.SetIcon(wx.Icon(config.assets.get("textures").get("icon"),wx.BITMAP_TYPE_ICO))
         
-        self.m_main_device = m_device_panel(self.m_main_device)
+        self.m_main_device = stardevice(self.m_main_device)
         self.m_main_server = m_server_panel(self.m_main_server)
         self.m_main_weather = starweather(self.m_main_weather)
 
