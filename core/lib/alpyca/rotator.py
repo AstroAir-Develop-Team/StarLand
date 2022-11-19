@@ -42,7 +42,7 @@
 # 21-Jul-22 (rbd) 2.0.1 Resolve TODO reviews
 # -----------------------------------------------------------------------------
 
-from core.lib.pyascom.device import Device
+from core.lib.alpyca.device import Device
 
 class Rotator(Device):
     """ASCOM Standard IRotatorV3 interface."""

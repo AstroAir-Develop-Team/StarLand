@@ -47,7 +47,7 @@ class CameraInfo():
 #
 # #################################################################
 
-class Camera(Device):
+class BasicCamera(Device):
     """
     Base class for camera control based on Device class
     """

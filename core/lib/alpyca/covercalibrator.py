@@ -40,8 +40,8 @@
 # 04-Jun-22 (rbd) 2.0.0-dev1 Fix capitalization of OpenCover 
 # -----------------------------------------------------------------------------
 
-from core.lib.pyascom.docenum import DocIntEnum
-from core.lib.pyascom.device import Device
+from core.lib.alpyca.docenum import DocIntEnum
+from core.lib.alpyca.device import Device
 
 class CalibratorStatus(DocIntEnum):
     """Indicates the current status of the calibrator"""

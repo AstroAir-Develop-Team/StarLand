@@ -18,423 +18,585 @@ Boston, MA 02110-1301, USA.
 
 """
 
+import os
 from time import sleep
 from requests import exceptions
-import ephem
+from yaml import (safe_load,SafeLoader,safe_dump)
 
-from core.lib.pyascom.exceptions import (DriverException,
-                                         NotConnectedException,
-                                         NotImplementedException,
-                                         ParkedException)
-from core.lib.pyascom.telescope import Telescope
+from core.device.basictelescope import (BasicTelescope,
+                                    TelescopeInfo)
+from core.lib.alpyca.telescope import (Telescope,
+                                        DriveRates)
+from core.lib.alpyca.exceptions import (DriverException,
+                                        NotConnectedException,
+                                        NotImplementedException)
+
 from core.lib.starlog import starlog
 
 log = starlog(__name__)
 
-import gettext
-
 import config
 
+import gettext
 _ = gettext.gettext
 
-class telescope_info():
-    """Telescope Info from ASCOM"""
-    _address = None # Address
-    _api_version = None # API version
-    _description = None # 赤道仪描述
-    _coordinates_type = None # 赤道仪坐标类型
-
-    _can_park = False       # 能否归为 from CanPark
-    _can_unpark = False     # 能否取消归为 from CanUnpark
-    _can_home = False       # 能否回家 from CanFindHome
-    _can_guide = False      # 能否导星 from CanPulseGuide
-    _can_tracking = False   # 能否跟踪 from CanTrack
-
-    _can_slewing = False    # 能否转动 from CanSlewing
-    _can_slewing_async = False      # 能否校准 from CanSlewingAsync
-
-    _can_slewing_azalt = False       # 能否根据地平经纬度转动 from CanSlewAzalt
-    _can_slewing_azalt_async = False # 能否根据地坪经纬度校准 from CanSlewAzaltAsync
-
-    _can_set_park = False       # 能否设置归位位置
-    _can_set_guide_rate = False # 能否设置导星速率
-    _can_set_ra_rate = False    # 能否设置RA转动速度
-    _can_set_dec_rate = False   # 能否设置DEC转动速度
-
-    _is_guiding = False # 是否正在导星 from IsPulseGuiding
-    _guide_ra_rate : float  # RA导星速率  from GuideRateRightAscension
-    _guide_dec_rate : float # DEC导星速率 from GuideRateDeclination
-
-    _is_tracking = False # 是否正在跟踪 from Tracking
-    _tracking_ra_rate : float # RA跟踪速率 from RightAscensionRate
-    _tracking_dec_rate : float # DEC跟踪速率 from DeclinationRate
-
-    _is_slewing = False # 是否在转动
-    _target_ra = 0.0 # 当前RA坐标
-    _target_dec = 0.0 # 当前DEC坐标
-    _convert_ra : str # 转化后的RA坐标
-    _convert_dec : str # 转化后的DEC坐标
-    _target_az = 0.0 # 当前AZ坐标
-    _target_alt = 0.0 # 当前ALT坐标
-    _convert_az = 0.0 # 转化后的AZ坐标
-    _convert_alt = 0.0 # 转化后的ALT坐标
-
-    _is_parked = False
-
-    def return_dict(self) -> dict:
-        """Return a dictionary"""
-        dic = {
-            "ADDRESS": self._address,
-            "API_VERSION" : self._api_version,
-            "Description": self._description,
-            "Coordinates_Type" : self._coordinates_type,
-            "Can" : {
-                "Park" : self._can_park,
-                "Unpark" : self._can_unpark,
-                "Home" : self._can_home,
-                "Guide" : self._can_guide,
-                "Tracking" : self._can_tracking
-            },
-            "CanSet" : {
-                "GuideRate" : self._can_set_guide_rate,
-                "Park" : self._can_set_park,
-                "RARate" : self._can_set_ra_rate,
-                "DECRate" : self._can_set_dec_rate
-            },
-            "Slewing" : {
-                "Can" : self._can_slewing,
-                "Async" : self._can_slewing_async,
-                "CanAzAlt" : self._can_slewing_azalt,
-                "CanAzAltAsync" : self._can_slewing_azalt_async,
-                "IsSlewing" : self._is_slewing
-            },
-            "Tracking" : {
-                "IsTracking" : self._is_tracking,
-                "TrackingRARate"  : self._tracking_ra_rate,
-                "TrackingDECRate" : self._tracking_dec_rate,
-            },
-            "Guiding" : {
-                "IsGuiding" : self._is_guiding,
-                "GuideRARate" : self._guide_ra_rate,
-                "GuideDecRate" : self._guide_dec_rate
-            },
-            "Target" : {
-                "RA" : self._target_ra,
-                "DEC" : self._target_dec,
-                "ConvertRA" : self._convert_ra,
-                "ConvertDEC" : self._convert_dec,
-                "Az" : self._target_az,
-                "Alt" : self._target_alt,
-                "ConvertAz" : self._convert_az,
-                "ConvertAlt" : self._convert_alt,
-            }
-        }
-        return dic
-
-class telescope():
-    """Telescope based on ASCOM"""
+class telescope(BasicTelescope):
+    """ASCOM telescope class"""
 
     def __init__(self) -> None:
         """Construct"""
-        self.info = telescope_info()
+        self.info = TelescopeInfo()
+        self.device = None
+        log.log(_("Initialize ascom telescope object object"))
 
     def __del__(self) -> None:
-        """delete"""
+        """Destructor"""
+        if self.info._is_connected:
+            r = self.disconnect({})
+            if r.get("status") != "success":
+                log.loge(_("Failed to delete ascom telescope object"))
+        self.device = None
+        log.log(_("Successfully deleted ascom telescope object"))
 
-    def return_message(self,tpye : str,message : str,advice : str = "") -> dict:
-        """Return message in dict format"""
-        r = {
-            "status" : tpye,
-            "message" : message,
-            "advice" : advice
-        }
-        return r
-
-    def connect(self, host = "127.0.0.1", port = "11111",device_number=0) -> dict:
+    def connect(self, params: dict) -> dict:
         """
-        Connect to the specified Telescope
-        @params
-            @host : host address that will be used
-            @port : port number that will be used
-            @device_number : device number default value is 0
-
-        @return : dict
-            @status : status code
-            @message : message
-            @advice : advice
+            Connect to ASCOM telescope
+            Args:
+                params: {
+                    "host" : "127.0.0.1",
+                    "port" : 11111,
+                    "device_number" : int # default is 0
+                }
+            Returns:
+                {
+                    "status" : " "success","error","warning","debug"
+                    "message" : "ASCOM telescope is connected" # success
+                                "Faild to connect to ASCOM telescope" # error
+                                "ASCOM telescope is connected with warning" # warning
+                    "params" : {
+                        "name" : str
+                        "info" : TelescopeInfo object
+                    }
+                }
         """
+        host = params.get("host")
+        port = params.get("port")
+        device_number = params.get("device_number")
+        # Check if the parameters is legal | 检查输入是否合法
+        if not isinstance(host, str) or not isinstance(device_number,int) or not isinstance(port, int):
+            log.loge(_("Invalid parameters when executing connect function"))
+            return self.return_message("error",_("Invalid parameters when executing connect function"))
+        ip_address = host + ":" + str(port)
+        # Connect to ASCOM Remote Server | 连接ASCOMRemote服务器
         try:
-            self.device = Telescope(host + ':' + port,device_number)
+            self.device = Telescope(ip_address,device_number)
             self.device.Connected = True
+            self.info._is_connected = True
         except DriverException as exception:
-            log.loge(_("Failed to connect to telescope , error: %s"), exception)
-            return self.return_message("error",_("Failed to connect to Telescope"),_("try again"))
+            log.loge(_(f"Failed to connect to telescope , error: {exception}"))
+            return self.return_message("error",_("Failed to connect to Telescope"),{"error": exception})
         except exceptions.ConnectionError as exception:
             log.loge(_(f"Remote connection error: {exception}"))
-            return self.return_message("error",_("Remote connection error"),_("try again"))
+            return self.return_message("error",_("Remote connection error"),{"error": exception})
         log.log(_("Connected to telescope successfully"))
-
-        res = self.update_telescope_configuration()
+        # Update Telescope Infomation | 更新赤道仪信息
+        res = self.update_config()
         if res.get("status") != "success":
             return res
+        r = {
+            "name" : self.info._name,
+            "info" : res.get("params")
+        }
+        return self.return_message("success",_("Connected to Telescope successfully"),r)
 
-        return self.return_message("success",_("Connected to Telescope successfully"),"")
-
-    def disconnect(self) -> dict:
+    def disconnect(self, params: dict) -> dict:
         """
-        Disconnect
-        @return: dict
-            @status: status code
-            @message: message
-            @advice: advice
+            Disconnect from ASCOM telescope
+            Args:
+                params: {
+                    "name" : str
+                }
+            Returns:
+                {
+                    "status" : " "success","error","warning","debug"
+                    "message" : "Disconnect from ASCOM telescope successfully" # success
+                                "Faild to disconnect from ASCOM telescope" # error
+                                "ASCOM telescope is disconnected with warning" # warning
+                    "params" : {
+                        "error" : error message # usually exception
+                    }
+                }
+            Note : Must disconnect from telescope when destory self !
         """
+        log.log(_("Try to disconnect from ASCOM telescope"))
+        name = params.get("name")
         try:
             self.device.Connected = False
+            self.info._is_connected = False
         except DriverException as e:
             log.loge(_("Failed to disconnect from telescope , error : %s"),e)
-            return self.return_message("error",_("Failed to disconnect from Telescope"),_("Try again"))
+            return self.return_message("error",_("Failed to disconnect from ASCOm telescope"),{"error" : exception})
         except exceptions.ConnectionError as exception:
             log.loge(_(f"Remote connection error: {exception}"))
-            return self.return_message("error",_("Remote connection error"),_("try again"))
-        log.log(_("Disconnect from Telescope successfully"))
-        return self.return_message("success",_("Disconnect from Telescope successfully"),"")
-
-    def update_telescope_configuration(self) -> dict:
-        """Update the Telescope configuration"""
+            return self.return_message("error",_("Remote connection error"),{"error" : exception})
+        log.log(_("Disconnect from ASCOM telescope successfully"))
+        return self.return_message("success",_("Disconnect from ASCOM telescope successfully"),{})
+    
+    def update_config(self) -> dict:
+        """
+            Update configuration of ASCOM telescope
+            Returns:
+                {
+                    "status" : "success","error","warning","debug"
+                    "message" : "Update configuration successfully" # success
+                                "Faild to update configuration" # error
+                                "ASCOM configuration is updated with warning" # warning
+                    "params" : {
+                        "info" : TelescopeInfo object (use get_dict())
+                        "error" : error message # usually exception
+                    }
+                }
+            Note : This function is usually run when initialize the telescope
+        """
+        log.log(_("Update ASCOM telescope configuration"))
         try:
+            """Get basic information | 获取基础信息"""
             self.info._address = self.device.address
+            self.info._name = self.device.Name
             self.info._api_version = self.device.api_version
-            self.info._description = self.device.Description
-
+            self.info._id = self.device._client_id
             self.info._coordinates_type = self.device.EquatorialSystem.value
-            self.updatecoordinates()
-
+            self.info._description = self.device.Description
+            """Get ability information | 获取能力信息 (即是否能够执行某些功能)"""
+            self.info._can_slewing = self.device.CanSlew
             self.info._can_park = self.device.CanPark
             self.info._can_unpark = self.device.CanUnpark
             self.info._can_home = self.device.CanFindHome
-            self.info._can_guide= self.device.CanPulseGuide
             self.info._can_tracking = self.device.CanSetTracking
-
-            self.info._can_slewing = self.device.CanSlew
-            self.info._can_slewing_async = self.device.CanSlewAsync
-            self.info._can_slewing_azalt = self.device.CanSlewAltAz
-            self.info._can_slewing_azalt_async = self.device.CanSlewAltAzAsync
-            
+            self.info._can_guiding = self.device.CanPulseGuide
             self.info._can_set_park = self.device.CanSetPark
-            self.info._can_set_dec_rate = self.device.CanSetDeclinationRate
+            self.info._can_set_home = self.device.CanFindHome
             self.info._can_set_ra_rate = self.device.CanSetRightAscensionRate
-            self.info._can_set_guide_rate = self.device.CanSetGuideRates
-
-            self.info._is_guiding = self.device.IsPulseGuiding
-            self.info._guide_ra_rate = self.device.GuideRateRightAscension
-            self.info._guide_dec_rate = self.device.GuideRateDeclination
-
-            self.info._is_tracking = self.device.Tracking
+            self.info._can_set_dec_rate = self.device.CanSetDeclinationRate
+            """Get property infomation | 获取配置信息"""
+            self.info._lon = self.device.SiteLongitude
+            self.info._lat = self.device.SiteLatitude
             self.info._tracking_ra_rate = self.device.RightAscensionRate
             self.info._tracking_dec_rate = self.device.DeclinationRate
-
-            self.info._target_ra = self.device.RightAscension
-            self.info._target_dec = self.device.Declination
-
+            self.info._guiding_ra_rate = self.device.GuideRateRightAscension
+            self.info._guiding_dec_rate = self.device.GuideRateDeclination
+            self.info._slewing_ra_rate = 1.0
+            self.info._slewing_dec_rate = 1.0
+            """Get current telescope information | 获取赤道仪当前信息"""
+            self.info._ra = self.device.RightAscension
+            self.info._dec = self.device.Declination
+            self.info._az = self.device.Azimuth
+            self.info._alt = self.device.Altitude
+            coord = self.calc_coordinates({"type": "h","RA" : self.info._ra,"DEC": self.info._dec}).get("params")
+            self.info._convert_ra = coord.get("RA")
+            self.info._convert_dec = coord.get("DEC")
+            coord = self.calc_coordinates({"type": "h","RA" : self.info._az,"DEC": self.info._alt}).get("params")
+            self.info._convert_az = coord.get("RA")
+            self.info._convert_alt = coord.get("DEC")
+            """Get current status of the telescope | 获取赤道仪当前状态"""
+            self.info._is_parked = self.device.AtPark
+            self.info._is_home = self.device.AtHome
+            self.info._is_tracking = self.device.Tracking
+            self.info._is_slewing = self.device.Slewing
+            self.info._is_guiding = self.device.IsPulseGuiding
+            """Set configuration file name | 设置配置文件名称默认为设备名称"""
+            self.info._config_file = self.device.Name
         except NotConnectedException as exception:
-            log.loge(_("Telescope hadn't connected,please connect before continuing"))
-            return self.return_message("error",_("Telescope had not connected"),_("Connected before continuing"))
+            log.loge(_("No telescope connected , please connect to telescope before run update_config()"))
+            return self.return_message("error", _("No telescope connected"),{"error" : exception})
         except DriverException as exception:
-            log.loge(_("Could not get device information for telescope"))
-            return self.return_message("error",_("Could not get device information"),_("Try again"))
+            log.loge(_("Telescope driver error , when run update_config()"))
+            return self.return_message("error", _("Telescope driver error"),{"error" : exception})
         except exceptions.ConnectionError as exception:
-            log.loge(_(f"Remote connection error: {exception}"))
-            return self.return_message("error",_("Remote connection error"),_("try again"))
+            log.loge(_("Remote server connection error, when run update_config()"))
+            return self.return_message("error",_("Remote connection error"),{"error" : exception})
         
-        log.log(_("Update Telescope configuration successfully"))
-        return self.return_message("success",_("Update Telescope configuration successfully"),"")
+        log.log(_("Update telescope configuration successfully"))
+        return self.return_message("success", _("Update telescope configuration successfully"),self.info.get_dict())
 
-    def slew(self,params : dict) -> dict:
+    def load_config(self, params: dict) -> dict:
         """
-        Slewing to coordinates
-        @params : {
-            "J2000": boolean # for coordinates convert
-            "RA" : string # target ra coordinate
-            "DEC" : string # target dec coordinate
+            Load configuration from file | 从文件中加载配置
+            Args:
+                {
+                    "filename": filename,
+                    "path": path,
+                }
+            Return:
+                {
+                    "status": "success","error","warning","debug"
+                    "message" : str
+                    "params" : configuration load from file
+                }
+        """
+        path = os.path.join(params.get("path"), params.get("filename"))
+        if not os.path.isfile(path):
+            log.loge(_("Faild to load configuration file %(path)s"))
+            return self.return_message("error", _("Faild to load configuration file %(path)"),{})
+        with open(path, mode = 'r', encoding="utf-8") as file:
+            config = safe_load(file, Loader=SafeLoader)
+
+    def save_config(self) -> dict:
+        """
+            Save the configuration file | 保存配置文件
+            Return:
+                {
+                    "status" : "success","error","warning","debug"
+                    "message" : str
+                    "params" : {
+                        "error" : exception
+                    }
+                }
+        """
+        _p = os.path.join
+        if self.info._config_file.find("yaml") == -1:
+            self.info._config_file += ".yaml"
+        folder = _p("config",_p("device","telescope"))
+        if not os.path.exists(folder):
+            os.mkdir(folder)
+        path = _p(_p(_p(_p(os.getcwd(),"config"),"device"),"telescope"),self.info._config_file)
+        if os.path.isfile(path):
+            """TODO"""
+        try:
+            with open(path,mode="w+",encoding="utf-8") as file:
+                safe_dump(self.info.get_dict(), file)
+        except IOError as exception:
+            log.loge(_(f"Faild to save configuration file {path} error : {exception}"))
+            return self.return_message("error", _("Faild to save configuration file %(path)"),self.info.get_dict())
+        log.log(_("Save configuration file successfully"))
+        return self.return_message("success", _("Save configuration file successfully"),self.info.get_dict())
+
+    def refresh_info(self) -> dict:
+        """
+            Refresh telescope information | 刷新赤道仪信息
+            Return : {
+                "status" : "success","error","warning","debug"
+                "message" : str
+                "params" : {
+                    "error" : exception
+                    "info" : self.info
+                }
+            }
+        """
+        r = {
+            "status" : "success",
+            "message" : "Refresh information",
+            "params" : {
+                "info" : self.info.get_dict()
+            }
         }
+        return r
+    
+    # ###########################################################
+    # Goto Functions
+    # ###########################################################
+
+    def goto(self, params: dict) -> dict:
         """
+            Goto the current coordinates
+            Args:
+                params : {
+                    "mode" : str # "p"(ra,dec) or "h"(az,alt)
+                    "crood_type" : str # "J2000" or "JNow"
+                    "input_type" : str # "h" or "f" default is "h"
+                    "ra" : str | float 
+                    "dec" : str | float 
+                    "az" : str | float
+                    "alt" : str | float
+                }
+            Return:
+                {
+                    "status" : str # "success","error","warning","debug"
+                    "message" : "Goto the specified coordinates successfully" # success
+                                "Faild to goto the specified coordinates" # error
+                                "Goto the specified coordinates with warning" # warning
+                    "params" : {
+                        "error" : exception
+                        "info" : {
+                            "ra" : ra
+                            "dec" : dec
+                            "az" : az
+                            "alt" : alt
+                        }
+                    }
+
+                }
+        """
+        while self.info._is_operating:
+            sleep(1)
+        self.info._is_operating = True
+        # Check if the telescope is available to goto | 检查赤道仪是否能否Goto
         if not self.info._can_tracking:
-            log.loge(_("Telescope had no tracking mode and could not use slewing function"))
-            return self.return_message("error",_("Failed to slew"),_("Change a telescope"))
-        coord = []
-        if params.get("J2000") is True:
-            """Convert J2000 coordinates to JNow coordinates"""
-            coord = self.convert_J2000_to_JNow(params.get("RA"),params.get("DEC"))
+            log.loge(_("Telescope had no tracking mode and was not available to goto"))
+            return self.return_message("error", _("Telescope had no tracking mode"),{"advice" : "Change a telescope"})
+        if not self.info._can_slewing:
+            log.loge(_("Telescope had no slewing mode and was not available to goto"))
+            return self.return_message("error", _("Telescope had no slewing mode"),{"advice" : "Change a telescope"})
+        # Check the coordinates
+        mode = params.get("mode")
+        input_type = params.get("input_type")
+        ra = params.get("ra")
+        dec = params.get("dec")
+        az = params.get("az")
+        alt = params.get("alt")
+        # Check if the inneed coordinates are given | 检查是否包含需要的参数
+        if mode == "p" : 
+            if ra is None and dec is None:
+                log.loge(_("EmptyString"))
+                return self.return_message("error", _("EmptyString"),{})
+        elif mode == "h" :
+            if az is None and alt is None:
+                log.loge(_("EmptyString"))
+                return self.return_message("error", _("EmptyString"),{})
         else:
-            coord = [params.get("RA"),params.get("DEC")]
-        # 切换至跟踪模式，准备执行Goto
+            log.loge(_("Invalid mode"))
+            return self.return_message("error", _("Invalid mode"),{})
+        # Check if the coordinates type is correct | 检查坐标类型是否正确
+        if input_type == "h" :
+            if not isinstance(ra,str) or not isinstance(dec,str):
+                log.loge(_("Invalid input coordinates type"))
+                return self.return_message("error", _("Invalid input coordinates type"),{})
+        elif input_type == "f":
+            if not isinstance(ra,float) or not isinstance(dec,float):
+                log.loge(_("Invalid input coordinates type"))
+                return self.return_message("error", _("Invalid input coordinates type"),{})
+        else:
+            log.loge(_("Invalid input coordinates type"))
+            return self.return_message("error", _("Invalid input coordinates type"),{})
+        # Convert coordinates if necessary | 如果需要的话转化坐标
+        if params.get("coord_type") == "J2000":
+            self.calc_coordinates_j("JNow",ra,dec)
+        # Start goto the target coordinate | 开始Goto
+        log.log(_(f"Start goto [{ra},{dec}]"))
         try:
             self.device.Tracking = True
+            self.info._is_slewing = True
+            self.device.SlewToCoordinatesAsync(ra, dec)
+            log.log(_("Waiting for telescope slewing to target coordinates"))
+            while self.device.Slewing:
+                sleep(1)
         except NotImplementedException as exception:
             log.loge(_(f"Telescope slew error : {exception}"))
-            return self.return_message("error",_("Telescope slew error"),_("No tracking mode available"))
+            return self.return_message("error", _("Telescope slew error"),{"error" : exception})
         except NotConnectedException as exception:
-            log.loge(_("Telescope hadn't connected,please connect before continuing"))
-            return self.return_message("error",_("Telescope had not connected"),_("Connected before continuing"))
+            log.loge(_("Telescope had not connected"))
+            return self.return_message("error", _("Telescope had not connected"),{"error" : exception})
         except DriverException as exception:
-            log.loge(_(f"Failed to start tracking , error : {exception}"))
-            return self.return_message("error",_("Failed to start tracking"),_("Try again"))
+            log.loge(_("Telescope had an error"))
+            return self.return_message("error", _("Telescope had an error"),{"error" : exception})
         except exceptions.ConnectionError as exception:
-            log.loge(_(f"Remote connection error: {exception}"))
-            return self.return_message("error",_("Remote connection error"),_("try again"))
-        
-        if not self.info._can_slewing_async:
-            log.loge(_("Telescope had no async mode available"))
-            self.device.Tracking = False
-            return self.return_message("error",_("Telescope had no async mode available"),_("Change a Telescope"))
-
-        log.log(_(f"Start slewing to {coord}"))
-        self.info._is_slewing = True
-        try:
-            self.device.SlewToCoordinatesAsync(coord[0], coord[1])
-            log.log(_("Waiting for telescope slewing to complete"))
-        except ParkedException as exception:
-            log.loge(_("Telescope had already parked"))
+            log.loge(_("Remote connection error"))
+            return self.return_message("error", _("Remote server connect error"),{"error" : exception})
+        finally:
             self.info._is_slewing = False
-            return self.return_message("error",_("Telescope had already parked"),_("Unpark"))
-        
-        while(self.device.Slewing):
-            sleep(1)
-        
-        log.log(_(f"Successfully slew to coordinates [params.get('RA',params.get('DEC')]"))
-        self.info._is_slewing = False
-        self.device.Tracking = False
-        return self.return_message("success",_("Telescope slew successfully"),"")
+            if not self.info._is_tracking:
+                self.device.Tracking = False
+            self.info._is_operating = False
+        log.log(_(f"Successfully goto the specified coordinates : [{ra},{dec}]"))
+        r = {
+            "ra" : self.device.RightAscension,
+            "dec" : self.device.Declination,
+            "az" : self.device.Azimuth,
+            "alt" : self.device.Altitude
+        }
+        return self.return_message("success", _("Successfully goto the specified coordinates"),r)
 
-    def abort_slew(self) -> dict:
-        """Abort Slewing"""
-        if not self.info._can_slewing:
-            log.loge(_("Telescope have no slewing function available"))
-            return self.return_message("error",_("Telescope have no slewing function available"),_("GG"))
+    def abort_goto(self) -> dict:
+        """
+            Abort goto operation | 终止Goto\n
+            Return:
+                {
+                    "status" : "success","error","warning","debug"
+                    "message" : "Abort goto operation successfully" # success\n
+                                "Faild to abort operation" # error\n
+                                "Abort operation with warning" # warning\n
+                    "params" : {}
+                }
+            Note : This function should be thread safe , if not maybe damage telescope
+        """
+        while self.info._is_operating:
+            sleep(1)
+        self.info._is_operating = True
         if not self.info._is_slewing:
-            log.logw(_("Telescope is not slewing , please do not execute this command"))
-            return self.return_message("warning",_("Telescope is not slewing"),"Please do not execute this command")
+            log.logw(_("Telescope is not slewing , please do not execute abort_goto()"))
+            return self.return_message("error", _("Telescope is not slewing"),{})
         try:
             self.device.Slewing = False
         except NotConnectedException as exception:
-            log.loge(_("Telescope hadn't connected,please connect before continuing"))
-            return self.return_message("error",_("Telescope had not connected"),_("Connected before continuing"))
+            log.loge(_("Telescope had not connected"))
+            return self.return_message("error",_("Telescope had not connected"),{"error" : exception})
         except DriverException as exception:
-            log.loge(_(f"Error abort slewing , error : {exception}"))
-            return self.return_message("error",_("Error abort slewing"),_("Try again"))
-        log.log(_("Abort slewing successfully"))
+            log.loge(_("Telescope had an error"))
+            return self.return_message("error",_("Telescope had an error"),{"error" : exception})
+        finally:
+            self.info._is_operating = False
         self.info._is_slewing = False
-        return self.return_message("success",_("Abort slewing successfully"),"")
+        log.log(_("Abort telescope goto operation successfully"))
+        return self.return_message("success", _("Abort telescope goto operation successfully"),{})
 
-    def Park(self,timeout = 5) -> dict:
-        """Park"""
+    # #########################################################################
+    # Park Functions
+    # #########################################################################
+
+    def park(self) -> dict:
+        """
+            Park the telescope | 望远镜归位
+            Return:
+                {
+                    "status" : "success","error","warning","debug"
+                    "message" : "Park the telescope successfully" # success
+                                "Faild to park" # error
+                                "Park operation with warning" # warning
+                    "params" : {}
+                }
+            Note : After this operation , telescope could not be change at all until execute unpark()
+        """
+        while self.info._is_operating:
+            sleep(1)
+        self.info._is_operating = True
+        # If telescope has no park function | 如果赤道仪无法归位，那就GG
+        if not self.info._can_park:
+            log.loge(_("Telescope had no park function"))
+            return self.return_message("error", _("Telescope had no park function"),{}) 
+        # If telescope is slewing , just wait for it | 如果赤道仪正在运动中，则等待其结束
         if self.info._is_slewing:
-            log.logw(_("Telescope is still slewing,waiting for final"))
-            self.abort_slew()
-            while self.info._is_slewing:
+            log.logw(_("Telescope is still slewing , waiting for it completed"))
+            while self.device.Slewing:
                 sleep(1)
+        # If telescope is tracking , run abort_tracking() to stop it # 如果赤道仪正在跟踪就停止
         if self.info._is_tracking:
-            log.logw(_("Telescope is still tracking,waiting for final"))
-            # TODO: abort tracking
-        log.log(_("Attempting to park telescope"))
+            log.logw(_("Telescope is still tracking, waiting for it completed"))
+            res = self.abort_tracking()
+            if res.get("status") != "success":
+                return res
+            while self.device.Tracking:
+                sleep(1)
+        # Attempting to park the telescope | 尝试赤道仪归位
+        log.log(_("Attempting to park the telescope"))
         try:
             self.device.Park(True)
+        except NotImplementedError as exception:
+            log.loge(_(f"Telescope park error: {exception}"))
+            return self.return_message("error", _("Telescope park error"),{"error" : exception})
         except NotConnectedException as exception:
-            log.loge(_("Telescope hadn't connected,please connect before continuing"))
-            return self.return_message("error",_("Telescope had not connected"),_("Connected before continuing"))
+            log.loge(_(f"Telescope had not connected"))
+            return self.return_message("error", _("Telescope had not connected"),{"error" : exception})
         except DriverException as exception:
-            log.loge(_(f"Error park telescope , error : {exception}"))
-            return self.return_message("error",_("Error when park telescope"),_("Try again"))
-        log.log(_("Waiting for telescope parked"))
+            log.loge(_(f"Telescope had an error : {exception}"))
+            return self.return_message("error", _("Telescope had an error"), {"error" : exception})
+        except exceptions.ConnectionError as exception:
+            log.loge(_(f"Remote connection error: {exception}"))
+            return self.return_message("error", _("Remote connection error"),{"error" : exception})
+        finally:
+            self.info._is_operating = False
         time = 0
-        while not self.device.AtPark and time <= int(timeout):
+        while not self.device.AtPark and time < self.info._timeout:
             sleep(1)
             time += 1
-        if not self.device.AtPark and time >= int(timeout):
-            log.loge(_("Timeout while waiting for telescope parking"))
-            return self.return_message("error",_("Timeout while waiting for telescope parking"),_("Unable to"))
-        log.log(_("Telescope parked"))
+        if not self.device.AtPark and time >= self.info._timeout:
+            log.loge(_("Timeout waiting for telescope park operation"))
+            return self.return_message("error", _("Timeout"),{"error" : "Timeout"})
         self.info._is_parked = True
-        return self.return_message("success",_("Telescope parked successfully"),"")
-        
+        log.log(_("Telescope parked successfully"))
+        return self.return_message("success", _("Telescope parked successfully"),{})
+
     def unpark(self) -> dict:
-        """Unpark"""
-        if not self.is_parked:
-            log.loge(_("Telescope isn't parked , please do not execute this command"))
-            return self.return_message("error",_("Telescope isn't parked"),_("Please do not execute this command"))
+        """
+            Unpark the telescope | 解除望远镜归位
+            Return:
+                {
+                    "status" : "success","error","warning","debug"
+                    "message" : "Telescope unpark successfully" # success message
+                                "Faild to unpark" # error 
+                                "Park operation with warning" # warning
+                    "params" : {
+                        "error" : exception
+                    }
+                }
+            Note : This function should be called
+        """
+        while self.info._is_operating:
+            sleep(1)
+        self.info._is_operating = True
+        # If telescope has no park function | 如果赤道仪无法归位，那就GG
+        if not self.info._can_unpark:
+            log.loge(_("Telescope had no park function"))
+            return self.return_message("error", _("Telescope had no park function"),{})
+        if not self.info._is_parked:
+            log.logw(_("Telescope had not parked"))
+            return self.return_message("warning",_("Telescope had not parked"),{})
         try:
             self.device.Unpark()
         except NotConnectedException as exception:
-            log.loge(_("Telescope hadn't connected,please connect before continuing"))
-            return self.return_message("error",_("Telescope had not connected"),_("Connected before continuing"))
+            log.loge(_(f"Telescope had not connected"))
+            return self.return_message("error", _("Telescope had not connected"),{"error" : exception})
         except DriverException as exception:
-            log.loge(_(f"Error unpark telescope ,error : {exception}"))
-            return self.return_message("error",_("Error when unpark telescope"),_("Try again"))
-        self.info._is_parked = False
-        log.log(_("Unpark telescope successfully"))
-        return self.return_message("success",_("Unpark telescope successfully"),"")
-
-    def updatecoordinates(self) -> dict:
-        """Update coordinates"""
-        try:
-            self.info._target_ra = self.device.RightAscension
-            self.info._target_dec = self.device.Declination
-            self.info._target_az = self.device.Azimuth
-            self.info._target_alt = self.device.Altitude
-        except NotConnectedException as exception:
-            log.loge(_(f"Telescope hadn't connected,please connect before continuing , error : {exception}"))
-            return self.return_message("error",_("Telescope had not connected"),_("Connected before continuing"))
-        except DriverException as exception:
-            log.loge(_(f"Could not update coordinates for telescope , error : {exception}"))
-            return self.return_message("error",_("Could not get device information"),_("Try again"))
+            log.loge(_(f"Telescope had an error : {exception}"))
+            return self.return_message("error", _("Telescope had an error"), {"error" : exception})
         except exceptions.ConnectionError as exception:
             log.loge(_(f"Remote connection error: {exception}"))
-            return self.return_message("error",_("Remote connection error"),_("Start again"))
-        
-        def convert_coordinates(coord) -> str:
-            """Convert coordinates for people better to read"""
-            coord_h = int(coord)
-            coord_m = int((coord - coord_h) * 60)
-            coord_s = int((coord - coord_h - coord_m / 60) * 3600)
-            coord_h,coord_m,coord_s = map(str,[coord_h,coord_m,coord_s])
-            return coord_h + ":" + coord_m + ":" + coord_s
+            return self.return_message("error", _("Remote connection error"),{"error" : exception})
+        finally:
+            self.info._is_operating = False
 
-        self.info._convert_ra = convert_coordinates(self.info._target_ra)
-        self.info._convert_dec = convert_coordinates(self.info._target_dec)
-        self.info._convert_az = convert_coordinates(self.info._target_az)
-        self.info._convert_alt = convert_coordinates(self.info._target_alt)
-        
-        log.log(_("Refresh telescope coordinates successfully"))
-        return self.return_message("success",_("Update Telescope coordnaties successfully"),"")
-
-    def convert_J2000_to_JNow(self,ra_coord : str,dec_coord : str) -> list:
-        """
-        Convert a J2000 coordinates to a JNow coordinates
-        @ra_coord : RA J2000 coordinates ; format "xx:xx:xx"
-        @dec_coord : DEC J2000 coordinates ; format "xx:xx:xx" ; Must with +/-
-        @return : list of JNow coordinates ; format ["xx:xx:xx", "xx:xx:xx"]
-        """
-        l = []
-        """TODO: When DEC is negative number what should I do here"""
-
-        center_J2000 = ephem.Equatorial(ra_coord,dec_coord,epoch = ephem.J2000)
-        center_JNow = ephem.Equatorial(center_J2000, epoch=ephem.now())
-        
-        ra_h,ra_m,ra_s = str(center_JNow.ra).split(":")
-        ra_s = str(int(round(float(ra_s))))
-        ra = ra_h + ":" + ra_m + ":" + ra_s        
-        
-        dec_h,dec_m,dec_s = str(center_JNow.dec).split(":")
-        dec_s = str(int(round(float(dec_s))))
-        dec = dec_h + ":" + dec_m + ":" + dec_s
-
-        return [ra,dec]
+        self.info._is_parked = False
+        log.log_("Telescope unparked successfully")
+        return self.return_message("success", _("Telescope unparked successfully"), {})
     
-    def convert_coordinates_h_to_s(self,coordinates : str) -> str | None:
-        """Convert coordinates from hourangle to string"""
-        if not isinstance(coordinates,str):
-            log.loge(_(f"Unknown coordinates type: {coordinates}"))
-            return 
-        coord_h,coord_m,coord_s = map(int,coordinates.split(":"))
-        coord = coord_h + coord_m / 60 + coord_s / 3600
-        return "%.14f"%coord
+    # ###########################################################
+    # Home Functions
+    # ###########################################################
+
+    def home(self) -> dict:
+        """
+            Home the telescope | 赤道仪回家
+            Return:
+                {
+                    "status" : "success","error","warning","debug"
+                    "message" : "Telescope home successfully" # success message
+                                "Faild to home" # error 
+                                "Home operation with warning" # warning    
+                    "params" : None
+                }
+            Note : This function is called when you need (awa)
+        """
+        while self.info._is_operating:
+            sleep(1)
+        # If telescope has no home function
+        if not self.info._can_home:
+            log.loge(_("Telescope had no home function"))
+            return self.return_message("error", _("Telescope had no home function"),{})
+        # If telescope had already parked
+        if self.info._is_parked:
+            log.logw(_("Telescope had already parked"))
+            return self.return_message("warning",_("Telescope had already parked"),{})
+        self.info._is_operating = True
+        try:
+            self.device.FindHome()
+        except NotImplementedError as exception:
+            log.loge(_(f"Telescope had an error : {exception}"))
+            return self.return_message("error", _("Telescope had an error"),{})
+        except NotConnectedException as exception:
+            log.loge(_(f"Telescope had not connected"))
+            return self.return_message("error", _("Telescope had not connected"),{"error" : exception})
+        except DriverException as exception:
+            log.loge(_(f"Telescope had an error : {exception}"))
+            return self.return_message("error", _("Telescope had an error"), {"error" : exception})
+        except exceptions.ConnectionError as exception:
+            log.loge(_(f"Remote connection error: {exception}"))
+            return self.return_message("error", _("Remote connection error"),{"error" : exception})
+        finally:
+            self.info._is_operating = False
+
+        self.info._is_home = True
+        log.log_("Telescope home successfully")
+        return self.return_message("success", _("Telescope home successfully"), {})
+
+
+
+

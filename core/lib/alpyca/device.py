@@ -47,7 +47,7 @@ from threading import Lock
 from typing import List
 import requests
 import random
-from core.lib.pyascom.exceptions import NotImplementedException,InvalidValueException,ValueNotSetException,NotConnectedException,ParkedException,SlavedException,InvalidOperationException,ActionNotImplementedException,DriverException,AlpacaRequestException     # Sorry Python purists
+from core.lib.alpyca.exceptions import NotImplementedException,InvalidValueException,ValueNotSetException,NotConnectedException,ParkedException,SlavedException,InvalidOperationException,ActionNotImplementedException,DriverException,AlpacaRequestException     # Sorry Python purists
 
 API_VERSION = 1
 

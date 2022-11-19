@@ -38,7 +38,7 @@
 # 13-May-22 (rbd) 2.0.0-dev1 Project now called "Alpyca" - no logic changes
 # -----------------------------------------------------------------------------
 
-from core.lib.pyascom.device import Device
+from core.lib.alpyca.device import Device
 
 class Switch(Device):
     """ASCOM Standard ISwitch V2 Interface"""

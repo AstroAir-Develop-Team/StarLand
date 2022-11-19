@@ -27,6 +27,11 @@ log = starlog(__name__)
 import gettext
 _ = gettext.gettext
 
+__api__ = "Focuser Basic API"
+__api_version__ = "1.0.0"
+__copyright__ = "Max Qian"
+__license__ = "GPL3"
+
 # #################################################################
 #
 # Focuser Info Class
@@ -36,8 +41,53 @@ _ = gettext.gettext
 class FocuserInfo(object):
     """Focuser Info class for containing focuser information"""
 
+    """Basic Info"""
+    _address = None # For ASCOM & INDI
+    _name = None
+    _api_version : str
+    _description : str
+    _id : int
+    _timeout = 5
+    _config_file : str
+
+    """Property Info"""
+    _current_position : int
+    _max_steps : int
+    _max_steps_ : int
+    _step_size : int
+    _temperature : float
+
+    """Status Info"""
+    _is_connected = False
+    _is_moving = False
+    _is_operating = False
+
+    """Availability Info"""
+    _can_temperature = False
+
     def get_dict(self) -> dict:
         """Return focuser information in a dictionary"""
+        r = {
+            "address": self._address,
+            "api_version" : self._api_version,
+            "description": self._description,
+            "id": self._id,
+            "timeout" : self._timeout,
+            "ability" : {
+                "can_temperature" : self._can_temperature
+            },
+            "property" : {
+                "max_steps" : self._max_steps,
+                "max_steps_single" : self._max_steps_,
+                "step_size" : self._step_size,
+                "temperature" : self._temperature
+            },
+            "status" : {
+                "is_connected" : self._is_connected,
+                "is_moving" : self._is_moving,
+            }
+        }
+        return r
 
         
 # #################################################################
@@ -46,7 +96,7 @@ class FocuserInfo(object):
 #
 # #################################################################
 
-class Focuser(Device):
+class BasicFocuser(Device):
     """Focuser control class based on Device class"""
 
     def __init__(self) -> None:
@@ -66,7 +116,7 @@ class Focuser(Device):
         """
         return super().connect(params)     
 
-    def disconnect(self) -> dict:
+    def disconnect(self,params : dict) -> dict:
         """
             Disconnect from focuser and after execute this function we will lose connection with focuser.And should realize all the resources
             与电调断开连接，完成此步后就结束了任务，需要释放所有资源
@@ -90,6 +140,13 @@ class Focuser(Device):
         """
         return super().set_config(params)
 
+    def load_config(self, params: dict) -> dict:
+        """
+            Load the configuration of the current Focuser
+            加载电调配置
+        """
+        return super().load_config(params)
+
     def save_config(self) -> dict:
         """
             Save the configuration of the focuser . execute this function after "disconnect"
@@ -109,6 +166,7 @@ class Focuser(Device):
             Move the Focuser position 
             移动电调位置
             @ params : {
+                "direction": "front","back"
                 "step" : int # step number
                 "speed" : int # speed ? Will this be supported
             }

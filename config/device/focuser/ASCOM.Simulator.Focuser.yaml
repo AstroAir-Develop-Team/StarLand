@@ -1,0 +1,15 @@
+ability:
+  can_temperature: true
+address: 127.0.0.1:11111
+api_version: 1
+description: ASCOM Focuser Simulator Driver
+id: 29861
+property:
+  max_steps: 50000
+  max_steps_single: 50000
+  step_size: 20.0
+  temperature: 2.06
+status:
+  is_connected: true
+  is_moving: false
+timeout: 5

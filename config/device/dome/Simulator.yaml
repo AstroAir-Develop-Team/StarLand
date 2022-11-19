@@ -1,0 +1,23 @@
+ability:
+  can_az_sync: true
+  can_home: true
+  can_park: true
+  can_set_alt: true
+  can_set_az: true
+  can_set_park: true
+  can_set_shutter: true
+  'can_slave ': false
+address: 127.0.0.1:11111
+api_version: 1
+description: ASCOM Dome Simulator .NET
+id: 46058
+property:
+  alt: 1.0
+  az: 1.0
+status:
+  is_home: false
+  is_opened: closed
+  is_parked: true
+  is_slaved: false
+  is_slewing: false
+timeout: 5

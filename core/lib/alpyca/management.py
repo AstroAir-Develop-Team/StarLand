@@ -41,7 +41,7 @@
 
 from typing import List
 import requests
-from core.lib.pyascom.exceptions import AlpacaRequestException
+from core.lib.alpyca.exceptions import AlpacaRequestException
 
 API_VERSION = 1
 

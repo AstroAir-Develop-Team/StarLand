@@ -72,6 +72,11 @@ class Device():
         log.loge(_("The parent function should not be called"))
         return self.return_message("error","The parent function should not be called")
 
+    def load_config(self,params : dict) -> dict:
+        """Load the configuration | 加载配置，通常在初次连接设备时执行"""
+        log.loge(_("The parent function should not be called"))
+        return self.return_message("error","The parent function should not be called")
+
     def save_config(self) -> dict:
         """Save the configuration | 保存配置，通常在结束程序时运行"""
         log.loge(_("The parent function should not be called"))

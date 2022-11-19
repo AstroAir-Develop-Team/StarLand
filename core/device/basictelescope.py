@@ -24,7 +24,6 @@ from core.lib.starlog import starlog
 log = starlog(__name__)
 
 import gettext
-
 _ = gettext.gettext
 
 import ephem
@@ -44,59 +43,120 @@ class TelescopeInfo():
     """Telescope information"""
 
     """Basic Info"""
+    _address = None # For ASCOM & INDI
+    _name = None
     _api_version : str
     _description : str
     _id : int
+    _coordinates_type : int
+    _timeout = 5
+    _config_file : str
 
     """Ability Info"""
     _can_slewing = False
     _can_park = False
+    _can_unpark = False
     _can_home = False
     _can_tracking = False
     _can_guiding = False
 
+    _can_set_park = False
+    _can_set_home = False
+    _can_set_ra_rate = False
+    _can_set_dec_rate = False
+
     """Property Info"""
     _lat : str
     _lon : str
+    _tracking_ra_rate : float
+    _tracking_dec_rate : float
+    _guiding_ra_rate : float
+    _guiding_dec_rate : float
+    _slewing_ra_rate : float
+    _slewing_dec_rate : float
 
     """Current Info"""
     _ra : str
     _dec : str
     _az : str
     _alt : str
+    _convert_ra : str
+    _convert_dec : str
+    _convert_az : str
+    _convert_alt : str
+
+    """Status Info"""
+    _is_connected = False
+    _is_operating = False
+    _is_parked = False
+    _is_home = False
+    _is_tracking = False
+    _is_slewing = False
+    _is_guiding = False
 
     def get_dict(self) -> dict:
         """Return telescope information in a dictionary"""
         r = {
-            "Basic" : {
-                "api_version" : self._api_version,
-                "description" : self._description,
-                "id" : self._id
-            },
-            "Ability" : {
-                "can_slewing" : self._can_slewing,
-                "can_tracking" : self._can_tracking,
+            "address": self._address,
+            "api_version" : self._api_version,
+            "description": self._description,
+            "id": self._id,
+            "coordinates_type": self._coordinates_type,
+            "timeout" : self._timeout,
+            "ability" : {
+                "can_slewing": self._can_slewing,
                 "can_park" : self._can_park,
+                "can_unpark" : self._can_unpark,
                 "can_home" : self._can_home,
+                "can_tracking" : self._can_tracking,
                 "can_guiding" : self._can_guiding,
+                "can_set_park" : self._can_set_park,
+                "can_set_home" : self._can_set_home,
+                "can_set_ra_rate" : self._can_set_ra_rate,
+                "can_set_dec_rate" : self._can_set_dec_rate
             },
-            "Property" : {
+            "property" : {
+                "lon" : self._lon,
                 "lat" : self._lat,
-                "lon" : self._lon
+                "tracking_ra_rate" : self._tracking_ra_rate,
+                "tracking_dec_rate" : self._tracking_dec_rate,
+                "guiding_ra_rate" : self._guiding_ra_rate,
+                "guiding_dec_rate" : self._guiding_dec_rate,
+                "slewing_ra_rate" : self._slewing_ra_rate,
+                "slewing_dec_rate" : self._slewing_dec_rate
             },
-            "Current" : {
+            "current" : {
                 "ra" : self._ra,
                 "dec" : self._dec,
                 "az" : self._az,
-                "alt" : self._alt
+                "alt" : self._alt,
+                "convert" : {
+                    "ra" : self._convert_ra,
+                    "dec" : self._convert_dec,
+                    "az" : self._convert_az,
+                    "alt" : self._convert_alt
+                }
+            },
+            "status" : {
+                "is_connected" : self._is_connected,
+                "is_parked" : self._is_parked,
+                "is_home" : self._is_home,
+                "is_slewing" : self._is_slewing,
+                "is_tracking" : self._is_tracking,
+                "is_guiding" : self._is_guiding
             }
         }
         return r
 
+# #########################################################################
+# 
+# Basic Telescope Class
+#
+# #########################################################################
 
-class Telescope(Device):
+class BasicTelescope(Device):
     """
-    Basic Telescope class.Every telescope object should parent this class.
+    Basic Telescope class.Every telescope object should parent this class.\n
     基础的赤道仪类，所有赤道仪驱动都需要从此处派生，提供了最基础的模板。
     """
 
@@ -164,6 +224,22 @@ class Telescope(Device):
             Note : This function needs to be called
         """
         return super().update_config()
+
+    def load_config(self, params: dict) -> dict:
+        """
+            Load the configuration from file
+            从文件中加载配置
+            @ params : {
+                "filename" : filename
+                "path" : path
+            }
+            @ return : {
+                "status" : "success","error","warning","debug",
+                "message" : str,
+                "params" : configuration from file
+            }
+        """
+        return super().load_config(params)
 
     def save_config(self) -> dict:
         """
@@ -575,10 +651,10 @@ class Telescope(Device):
             """Convert coordinates from degrees to hourangle"""
             def calc_coordinates(coordinates) -> str:
                 """Convert coordinates from degrees to hourangle"""
-                coordinates_sign = None
+                coordinates_sign = "+"
                 """For DEC coordinates convert"""
                 if coordinates < 0:
-                    coordinates_sign = "-"
+                    coordinates_sign = ""
                 coord_h = int(coordinates)
                 coord_m = int((coordinates - coord_h) * 60)
                 coord_s = int((coordinates - coord_h - coord_m / 60) * 3600)

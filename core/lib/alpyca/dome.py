@@ -40,8 +40,8 @@
 # 21-Jul-22 (rbd) 2.0.1 Resolve TODO reviews
 # -----------------------------------------------------------------------------
 
-from core.lib.pyascom.docenum import DocIntEnum
-from core.lib.pyascom.device import Device
+from core.lib.alpyca.docenum import DocIntEnum
+from core.lib.alpyca.device import Device
 
 class ShutterState(DocIntEnum):
     """Indicates the current state of the shutter or roof"""

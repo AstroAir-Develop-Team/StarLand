@@ -1,0 +1,28 @@
+address: 127.0.0.1:11111
+api_version: 1
+current:
+  current_position: 0
+  offset_filter:
+  - 196
+  - 4512
+  - 6384
+  - 3777
+  - 3794
+  - 8386
+  - 63
+  - 4602
+description: Simulator description
+id: 13510
+properties:
+  filter:
+  - Red
+  - Green
+  - Blue
+  - Clear
+  - Ha
+  - OIII
+  - LPR
+  - Dark
+status:
+  is_connected: true
+timeout: 5

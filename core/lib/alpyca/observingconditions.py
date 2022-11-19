@@ -42,7 +42,7 @@
 # 30-Jun-22 (dvn) 2.0.0-dev3 Fix capital 'P' in averageperiod get.
 # -----------------------------------------------------------------------------
 
-from core.lib.pyascom.device import Device
+from core.lib.alpyca.device import Device
 
 class ObservingConditions(Device):
     """ASCOM Standard IObservingConditions Interface

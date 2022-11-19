@@ -12,5 +12,6 @@ Dependencies are minimal:
 * [Flask-SocketIO](https://pypi.org/project/Flask-SocketIO)
 * [lupa](https://pypi.org/project/lupa)
 * [numpy](https://pypi.org/project/numpy)
-* [requests](https://pypi.org/project/requests/)
+* [PyYAML](https://pypi.org/project/PyYAML)
+* [requests](https://pypi.org/project/requests)
 * [wxpython](https://pypi.org/project/wxpython)
