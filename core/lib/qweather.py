@@ -90,7 +90,7 @@ class Qweather():
             response = json.loads(get(f"http://ip-api.com/json/{ip}?lang=zh-CN").text)
             config.mainconfig["weather"]["location"] = response
             r_msg = response.get("country") + response.get("regionName") + response.get("city")    
-            return self.return_message("success",r_msg)
+            return self.return_message("success",r_msg,"")
         # 连接错误
         except exceptions.ConnectionError:
             log.loge(_("Could not connect Location server,please check Internet connnection!"))
@@ -100,14 +100,14 @@ class Qweather():
     def hitokoto(self) -> dict:
         if not self.is_internet_connected:
             log.loge(_("No internet connected,Could not use hitokoto function"))
-            return self.return_message("error",_("no internet connected",_("check")))
+            return self.return_message("error",_("no internet connected"),_("check"))
         try:
             # 获取每日一言
             response = get(config.mainconfig.get("weather").get("hitokoto").get("url")).json()
             if response.get("from_who") is None:
                 config.mainconfig["weahter"]["hitokoto"]["data"]["from"] = _("noname")
             config.mainconfig["weahter"]["hitokoto"]["data"]["word"] = response.get('hitokoto')
-            return self.return_message("success")
+            return self.return_message("success","","")
         except exceptions.ConnectionError:
             log.loge(_("Could not connect Hitokoto server,please check Internet connnection!"))
             return self.return_message("error",_("connection error"),_("unknown"))  

@@ -203,7 +203,7 @@ class focuser(BasicFocuser):
             log.loge(_("Faild to load configuration file %(path)s"))
             return self.return_message("error", _("Faild to load configuration file %(path)"),{})
         with open(path, mode = 'r', encoding="utf-8") as file:
-            config = safe_load(file, Loader=SafeLoader)
+            config = safe_load(file)
             
     def save_config(self) -> dict:
         """

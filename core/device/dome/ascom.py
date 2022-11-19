@@ -23,10 +23,9 @@ from core.device.basicdome import (BasicDome,
                                     DomeInfo)
 from core.lib.alpyca.dome import Dome, ShutterState
 from core.lib.alpyca.exceptions import (NotConnectedException,
-                                        DriverException,
-                                        NotImplementedException)
+                                        DriverException)
 from requests import exceptions
-from yaml import (safe_load,SafeLoader,safe_dump)
+from yaml import (safe_load,safe_dump)
 from core.lib.starlog import starlog
 
 log = starlog(__name__)
@@ -223,7 +222,7 @@ class dome(BasicDome):
             log.loge(_("Faild to load configuration file %(path)s"))
             return self.return_message("error", _("Faild to load configuration file %(path)"),{})
         with open(path, mode = 'r', encoding="utf-8") as file:
-            config = safe_load(file, Loader=SafeLoader)
+            config = safe_load(file)
             
     def save_config(self) -> dict:
         """

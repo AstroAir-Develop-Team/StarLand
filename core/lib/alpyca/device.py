@@ -46,7 +46,7 @@
 from threading import Lock
 from typing import List
 import requests
-import random
+from secrets import randbelow
 from core.lib.alpyca.exceptions import NotImplementedException,InvalidValueException,ValueNotSetException,NotConnectedException,ParkedException,SlavedException,InvalidOperationException,ActionNotImplementedException,DriverException,AlpacaRequestException     # Sorry Python purists
 
 API_VERSION = 1
@@ -93,7 +93,7 @@ class Device:
     # ------------------------------------------------
     # CLASS VARIABLES - SHARED ACROSS DEVICE INSTANCES
     # ------------------------------------------------
-    _client_id = random.randint(0, 65535)
+    _client_id = randbelow(65535)
     _client_trans_id = 1
     _ctid_lock = Lock()
     # ------------------------------------------------

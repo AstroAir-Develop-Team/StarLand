@@ -5,6 +5,7 @@ A new generation of astronomical photography terminal
 
 This package runs under Python 3.7 or later. It is compatible with most Linux distros, Windows , and MacOS.
 Dependencies are minimal: 
+* [astropy](https://pypi.org/project/astropy)
 * [colorama](https://pypi.org/project/colorama)
 * [ephem](https://pypi.org/project/ephem)
 * [Flask](https://pypi.org/project/Flask)
